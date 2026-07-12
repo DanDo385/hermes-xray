@@ -1,0 +1,24 @@
+# Hermes Runtime X-Ray
+
+Standalone browser-based observability demo for a Hermes-style tool-using agent.
+
+Repository: https://github.com/DanDo385/hermes-xray
+Inspired by, but independent from: https://github.com/DanDo385/agent-runtime
+
+## Interactive behavior
+
+A visitor enters a simple prompt and inspects five observable runtime stages:
+
+1. Prompt intake
+2. Context construction
+3. Loop policy
+4. Tool dispatch
+5. Verification and persistence
+
+The static demo displays model-visible prompt summaries, loop state, tool events, token estimates, stop reasons, and verification evidence. It does not expose hidden chain-of-thought, secrets, credentials, or private session fragments.
+
+## Files
+
+- `index.html`: self-contained HTML/CSS/JavaScript demo
+- `hermes-xray.json`: structured project/runtime export
+- `PORTFOLIO.md`: portfolio-site integration contract

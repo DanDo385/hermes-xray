@@ -1,0 +1,93 @@
+{
+  "title": "Hermes Runtime X-Ray",
+  "description": "An interactive observability explainer for a Hermes-style tool-using agent runtime, with prompt input, loop telemetry, model-visible prompt stack, tool events, token estimates, verification, and persistence boundaries.",
+  "outerRails": {
+    "inbound": "Inbound event",
+    "outbound": "Outbound response"
+  },
+  "loop": [
+    {
+      "part": 1,
+      "name": "Platform input",
+      "purpose": "Normalize an external platform event into a stable runtime and session identity.",
+      "flowLabel": "platform/session identity"
+    },
+    {
+      "part": 2,
+      "name": "Session hydration",
+      "purpose": "Build model-visible context from prompt text, message history, summaries, and memory.",
+      "flowLabel": "hydrated prompt + message history"
+    },
+    {
+      "part": 3,
+      "name": "Agent loop",
+      "purpose": "Run the model turn, enforce stop policy, and continue while tool work remains.",
+      "flowLabel": "agent loop"
+    },
+    {
+      "part": 4,
+      "name": "Tool dispatch",
+      "purpose": "Resolve requested tools, validate policy, execute calls, and return results to the loop.",
+      "flowLabel": "tool dispatch"
+    },
+    {
+      "part": 5,
+      "name": "Persistence",
+      "purpose": "Append transcripts, tool results, summaries, and memory-bearing state for future turns.",
+      "flowLabel": "persisted transcript / memory"
+    }
+  ],
+  "implementations": {
+    "hermes": {
+      "repo": "https://github.com/NousResearch/hermes-agent",
+      "language": "Python",
+      "runtimeSummary": "Python gateway + AIAgent + tools.registry + SQLite session DB",
+      "themeColor": "#228B22",
+      "anchors": [
+        "run_agent.py",
+        "agent/conversation_loop.py",
+        "agent/tool_executor.py",
+        "tools/registry.py",
+        "gateway/session.py",
+        "gateway/platforms/base.py"
+      ]
+    },
+    "openclaw": {
+      "repo": "https://github.com/openclaw/openclaw",
+      "language": "TypeScript",
+      "runtimeSummary": "TypeScript ACP/session layer + CoreAgentHarness + agentLoop + JSONL session tree",
+      "themeColor": "#b91c2a",
+      "anchors": [
+        "packages/agent-core/src/agent-loop.ts",
+        "packages/agent-core/src/harness/agent-harness.ts",
+        "packages/agent-core/src/harness/session/session.ts",
+        "packages/agent-core/src/harness/session/jsonl-storage.ts",
+        "packages/acp-core/src/session.ts",
+        "packages/acp-core/src/runtime/types.ts"
+      ]
+    }
+  },
+  "exports": {
+    "llmsTxt": "./llms.txt",
+    "json": "./hermes-xray.json"
+  },
+  "name": "Hermes Runtime X-Ray",
+  "interactive_xray": {
+    "working_name": "Hermes Runtime X-Ray",
+    "rejected_name": "Hermes Agent Dissect",
+    "purpose": "Let a visitor enter a simple prompt and inspect the observable runtime path without exposing hidden chain-of-thought.",
+    "stages": [
+      "prompt intake",
+      "context build",
+      "loop policy",
+      "tool dispatch",
+      "verify and persist"
+    ],
+    "disclosure_policy": "Show intent, assumptions, tool selection rationale, evidence, and verification. Do not show hidden chain-of-thought, secrets, credentials, or private session fragments."
+  },
+  "project": {
+    "repository": "https://github.com/DanDo385/hermes-xray",
+    "relationship_to_agent_runtime": "Independent project inspired by the Agent Runtime explainer; does not replace or modify agent-runtime.",
+    "portfolio_mode": "Copy index.html, llms.txt, and hermes-xray.json into public/project-assets/hermes-xray/demo/ and iframe index.html from /demos/hermes-xray."
+  }
+}

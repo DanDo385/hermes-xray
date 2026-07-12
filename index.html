@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermes Runtime X-Ray</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0c0f'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='monospace' font-size='14' font-weight='700' fill='%2322d3ee'%3EAR%3C/text%3E%3C/svg%3E">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0c0f;
+    --nav: #0f1218;
+    --panel: #11151b;
+    --panel2: #151b23;
+    --border: #243041;
+    --border2: #334155;
+    --text: #cbd5e1;
+    --muted: #748095;
+    --bright: #f1f5f9;
+    --blue: #60a5fa;
+    --cyan: #22d3ee;
+    --violet: #a78bfa;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #fb7185;
+  }
+
+  body[data-theme="light"] {
+    --bg: #e8edf4;
+    --nav: #dde5ef;
+    --panel: #ffffff;
+    --panel2: #f3f6fa;
+    --border: #b8c5d6;
+    --border2: #9aadc4;
+    --text: #1a2332;
+    --muted: #475569;
+    --bright: #0b1220;
+    --blue: #1d4ed8;
+    --cyan: #0e7490;
+    --violet: #6d28d9;
+    --green: #145214;
+    --amber: #b45309;
+    --red: #be123c;
+  }
+
+  body[data-theme="light"] nav {
+    box-shadow: 1px 0 0 var(--border2);
+  }
+  body[data-theme="light"] .logo,
+  body[data-theme="light"] .eyebrow {
+    color: var(--green);
+  }
+  body[data-theme="light"] nav a:hover {
+    color: var(--bright);
+    border-left-color: var(--green);
+  }
+  body[data-theme="light"] .top-actions,
+  body[data-theme="light"] .hero,
+  body[data-theme="light"] .map-card,
+  body[data-theme="light"] .source-card,
+  body[data-theme="light"] .callout {
+    border-color: var(--border2);
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.05),
+      0 10px 28px rgba(15, 23, 42, 0.07);
+  }
+  body[data-theme="light"] .pipeline-step {
+    background: #ffffff;
+    border-color: var(--border2);
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+  }
+  body[data-theme="light"] .pipeline-step:not(:last-child)::after,
+  body[data-theme="light"] .pipeline-step .num {
+    color: var(--green);
+  }
+  body[data-theme="light"] .flow-rail {
+    color: var(--muted);
+    font-weight: 700;
+  }
+  body[data-theme="light"] .flow-rail::before,
+  body[data-theme="light"] .flow-rail::after {
+    background: var(--border2);
+  }
+  body[data-theme="light"] p code,
+  body[data-theme="light"] li code {
+    border-color: rgba(20, 82, 20, 0.22);
+    background: rgba(20, 82, 20, 0.08);
+    color: #0a320a;
+  }
+  body[data-theme="light"] a {
+    color: var(--cyan);
+    font-weight: 500;
+  }
+  body[data-theme="light"] a:hover {
+    color: var(--green);
+  }
+  body[data-theme="light"] .agent-mode a:hover {
+    border-color: var(--green);
+    color: var(--green);
+  }
+  body[data-theme="light"] .theme-toggle button:hover,
+  body[data-theme="light"] .theme-toggle button[aria-pressed="true"] {
+    color: var(--green);
+    border-color: var(--green);
+    background: rgba(20, 82, 20, 0.06);
+  }
+  body[data-theme="light"] .part {
+    border-top-color: var(--border2);
+  }
+  body[data-theme="light"] .callout {
+    background: #fffbeb;
+    border-left-color: var(--amber);
+  }
+  body[data-theme="light"] .runtime-lines {
+    border-top-color: var(--border2);
+  }
+  body[data-theme="light"] .runtime-lines span:first-child {
+    color: var(--green);
+  }
+  body[data-theme="light"] th {
+    color: var(--muted);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.65 Inter, system-ui, sans-serif;
+  }
+
+  .top-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: min(520px, 100%);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+    box-shadow: 0 12px 28px rgba(0,0,0,.16);
+  }
+  .agent-mode {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding-right: 8px;
+    border-right: 1px solid var(--border);
+  }
+  .agent-mode-label {
+    color: var(--muted);
+    font: 700 10px "JetBrains Mono", monospace;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .agent-mode a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel2);
+    color: var(--bright);
+    text-decoration: none;
+    font: 700 11px "JetBrains Mono", monospace;
+  }
+  .agent-mode a:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+  .display-mode {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .display-mode-label {
+    color: var(--muted);
+    font: 700 10px "JetBrains Mono", monospace;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  nav {
+    position: sticky;
+    top: 0;
+    width: 250px;
+    min-width: 250px;
+    height: 100vh;
+    padding: 24px 0;
+    overflow-y: auto;
+    background: var(--nav);
+    border-right: 1px solid var(--border);
+  }
+  .logo {
+    padding: 0 20px 20px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--cyan);
+    font: 700 11px/1.5 "JetBrains Mono", monospace;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  nav a {
+    display: block;
+    padding: 7px 20px;
+    border-left: 2px solid transparent;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+  }
+  nav a:hover { color: var(--bright); border-left-color: var(--cyan); }
+  .nav-section {
+    padding: 16px 20px 5px;
+    color: var(--muted);
+    font: 700 10px "JetBrains Mono", monospace;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .theme-toggle {
+    display: flex;
+    gap: 8px;
+  }
+  .theme-toggle button {
+    width: 34px;
+    height: 30px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel);
+    color: var(--muted);
+    cursor: pointer;
+    font: 700 14px "JetBrains Mono", monospace;
+  }
+  .theme-toggle button:hover,
+  .theme-toggle button[aria-pressed="true"] {
+    color: var(--bright);
+    border-color: var(--cyan);
+  }
+
+  main {
+    position: relative;
+    flex: 1;
+    width: min(1180px, calc(100vw - 250px));
+    padding: 48px 56px 96px;
+  }
+  .page-header {
+    position: relative;
+    margin-bottom: 8px;
+    padding-right: min(540px, 48%);
+    min-height: 44px;
+  }
+  h1, h2, h3 {
+    color: var(--bright);
+    line-height: 1.08;
+  }
+  h1 {
+    max-width: 900px;
+    margin: 0 0 14px;
+    font: 750 clamp(34px, 5vw, 56px)/1.08 Inter, system-ui, sans-serif;
+  }
+  h2 { margin: 62px 0 18px; font: 750 28px/1.12 Inter, system-ui, sans-serif; }
+  h3 { margin: 28px 0 12px; font: 700 18px/1.2 Inter, system-ui, sans-serif; }
+  p { max-width: 880px; margin: 0 0 16px; }
+  a { color: var(--cyan); }
+  strong { color: var(--bright); }
+  code { font-family: "JetBrains Mono", monospace; }
+  p code, li code {
+    padding: 1px 6px;
+    border: 1px solid rgba(96,165,250,.24);
+    border-radius: 4px;
+    background: rgba(96,165,250,.1);
+    color: var(--cyan);
+    font-size: 12px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font: 600 13px "JetBrains Mono", monospace;
+    letter-spacing: .03em;
+    margin-bottom: 30px;
+  }
+  .hero {
+    margin: 28px 0 34px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+    overflow: hidden;
+  }
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(118px, 1fr));
+    gap: 10px;
+    margin: 12px 0 18px;
+  }
+  .flow-rail {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font: 700 11px "JetBrains Mono", monospace;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .flow-rail::before,
+  .flow-rail::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: var(--border);
+  }
+  .pipeline-step {
+    min-height: 88px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel2);
+    position: relative;
+  }
+  .pipeline-step:not(:last-child)::after {
+    content: "->";
+    position: absolute;
+    top: 50%;
+    right: -12px;
+    transform: translateY(-50%);
+    color: var(--cyan);
+    font: 700 13px "JetBrains Mono", monospace;
+    z-index: 1;
+  }
+  .pipeline-step .num {
+    color: var(--cyan);
+    font: 700 10px "JetBrains Mono", monospace;
+    letter-spacing: .08em;
+  }
+  .pipeline-step .label {
+    display: block;
+    margin-top: 7px;
+    color: var(--bright);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .pipeline-step .detail {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .runtime-lines {
+    display: grid;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font: 700 12px/1.55 "JetBrains Mono", monospace;
+  }
+  .runtime-lines div {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .runtime-lines span:first-child { color: var(--bright); }
+  .runtime-lines span:last-child { color: var(--muted); }
+
+  .part {
+    margin-top: 54px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+  }
+  .eyebrow {
+    margin-bottom: 9px;
+    color: var(--cyan);
+    font: 700 11px "JetBrains Mono", monospace;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .map-grid, .code-pair, .source-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .map-card, .source-card, .callout {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+    padding: 16px 18px;
+  }
+  .map-card h3, .source-card h3 { margin-top: 0; }
+  .source-card ul { margin: 0; padding-left: 19px; }
+  .source-card li { margin: 5px 0; }
+
+  .code-card {
+    min-width: 0;
+    border: 1px solid var(--snippet-border, var(--border));
+    border-radius: 8px;
+    background: var(--snippet-bg, var(--panel2));
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(0,0,0,.14);
+  }
+  .code-card.hermes {
+    --snippet-bg: #051005;
+    --snippet-fg: #e8f5ea;
+    --snippet-border: #124012;
+    --snippet-title-bg: #082808;
+    --snippet-title-fg: #ffffff;
+    --snippet-title-meta: #8fb996;
+    --snippet-accent: #145214;
+  }
+  .code-card.openclaw {
+    --snippet-bg: #050505;
+    --snippet-fg: #fff8f8;
+    --snippet-border: #a31d2a;
+    --snippet-title-bg: #1a0507;
+    --snippet-title-fg: #ffffff;
+    --snippet-title-meta: #fecaca;
+    --snippet-accent: #ef4444;
+  }
+  body[data-theme="light"] .code-card {
+    box-shadow: 0 6px 22px rgba(15, 23, 42, 0.1);
+  }
+  body[data-theme="light"] .code-card.hermes {
+    --snippet-bg: #c8dcc8;
+    --snippet-fg: #031808;
+    --snippet-border: #0a320a;
+    --snippet-title-bg: #082808;
+    --snippet-title-fg: #ffffff;
+    --snippet-title-meta: #a8cdb0;
+    --snippet-accent: #145214;
+  }
+  body[data-theme="light"] .code-card.openclaw {
+    --snippet-bg: #fff1f1;
+    --snippet-fg: #090909;
+    --snippet-border: #991b1b;
+    --snippet-title-bg: #090909;
+    --snippet-title-fg: #ffffff;
+    --snippet-title-meta: #fca5a5;
+    --snippet-accent: #b91c1c;
+  }
+  .code-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--snippet-border, var(--border));
+    background: var(--snippet-title-bg, transparent);
+    color: var(--snippet-title-fg, var(--bright));
+    font: 700 11px "JetBrains Mono", monospace;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .code-title span:first-child {
+    color: var(--snippet-title-fg, var(--bright));
+  }
+  .code-title span:first-child::before {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 8px;
+    border-radius: 999px;
+    background: var(--snippet-accent, var(--cyan));
+    vertical-align: 1px;
+  }
+  .code-title span:last-child {
+    color: var(--snippet-title-meta, var(--muted));
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+  pre {
+    margin: 0;
+    padding: 16px;
+    overflow-x: auto;
+    color: var(--snippet-fg, #dbeafe);
+    font: 12.5px/1.62 "JetBrains Mono", monospace;
+    tab-size: 2;
+  }
+  pre code { color: inherit; }
+  .note {
+    margin: 14px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .callout { border-left: 3px solid var(--amber); }
+  .callout strong { color: var(--amber); }
+  table {
+    width: 100%;
+    max-width: 980px;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    color: var(--muted);
+    font: 700 10px "JetBrains Mono", monospace;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .xray-lab {
+    margin: 34px 0;
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background:
+      radial-gradient(circle at top left, rgba(34,211,238,.12), transparent 34%),
+      linear-gradient(180deg, var(--panel), var(--panel2));
+    box-shadow: 0 18px 45px rgba(0,0,0,.18);
+  }
+  .xray-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, .8fr);
+    gap: 18px;
+    align-items: end;
+    margin-bottom: 18px;
+  }
+  .xray-head h2 {
+    margin: 4px 0 8px;
+  }
+  .xray-kicker {
+    color: var(--cyan);
+    font: 700 11px "JetBrains Mono", monospace;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .xray-safe {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .xray-console {
+    display: grid;
+    gap: 10px;
+  }
+  .xray-console label {
+    color: var(--bright);
+    font: 700 11px "JetBrains Mono", monospace;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .xray-input-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+  .xray-input-row input {
+    width: 100%;
+    min-height: 42px;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--bright);
+    padding: 0 13px;
+    font: 600 13px "JetBrains Mono", monospace;
+    outline: none;
+  }
+  .xray-input-row input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(34,211,238,.12);
+  }
+  .xray-input-row button,
+  .xray-stage-button {
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    background: var(--panel2);
+    color: var(--bright);
+    cursor: pointer;
+    font: 700 11px "JetBrains Mono", monospace;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+  .xray-input-row button {
+    padding: 0 15px;
+  }
+  .xray-input-row button:hover,
+  .xray-stage-button:hover,
+  .xray-stage-button[aria-pressed="true"] {
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+  .xray-flow {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(112px, 1fr));
+    gap: 10px;
+    margin: 18px 0;
+  }
+  .xray-node {
+    position: relative;
+    min-height: 94px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: rgba(10,12,15,.48);
+    transition: border-color .2s ease, transform .2s ease, background .2s ease;
+  }
+  .xray-node::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(34,211,238,.12), transparent 52%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .xray-node.active {
+    border-color: var(--cyan);
+    transform: translateY(-2px);
+    background: rgba(34,211,238,.08);
+  }
+  .xray-node.active::after { opacity: 1; }
+  .xray-node span {
+    display: block;
+  }
+  .xray-node .num {
+    color: var(--cyan);
+    font: 700 10px "JetBrains Mono", monospace;
+    letter-spacing: .08em;
+  }
+  .xray-node .title {
+    margin-top: 7px;
+    color: var(--bright);
+    font-weight: 800;
+    line-height: 1.2;
+  }
+  .xray-node .mini {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .xray-stage-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .xray-stage-button {
+    padding: 8px 10px;
+  }
+  .xray-panel-grid {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    gap: 14px;
+  }
+  .xray-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel);
+    overflow: hidden;
+  }
+  .xray-card h3 {
+    margin: 0;
+    padding: 11px 13px;
+    border-bottom: 1px solid var(--border);
+    color: var(--bright);
+    font: 700 12px "JetBrains Mono", monospace;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .xray-card-body {
+    padding: 13px;
+  }
+  .xray-list {
+    margin: 0;
+    padding-left: 18px;
+  }
+  .xray-list li {
+    margin: 7px 0;
+  }
+  .xray-code {
+    white-space: pre-wrap;
+    min-height: 190px;
+    margin: 0;
+    padding: 13px;
+    border-radius: 0;
+    background: #050a05;
+    color: #ddf7df;
+    font: 12px/1.6 "JetBrains Mono", monospace;
+  }
+  .xray-prompt-chip {
+    display: inline-block;
+    max-width: 100%;
+    margin-top: 8px;
+    padding: 6px 8px;
+    border: 1px solid var(--border2);
+    border-radius: 999px;
+    color: var(--bright);
+    background: var(--bg);
+    font: 700 11px "JetBrains Mono", monospace;
+    overflow-wrap: anywhere;
+  }
+  body[data-theme="light"] .xray-lab,
+  body[data-theme="light"] .xray-card,
+  body[data-theme="light"] .xray-node {
+    border-color: var(--border2);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .07);
+  }
+  body[data-theme="light"] .xray-input-row input,
+  body[data-theme="light"] .xray-prompt-chip {
+    background: #ffffff;
+    color: var(--bright);
+  }
+  body[data-theme="light"] .xray-code {
+    background: #c8dcc8;
+    color: #031808;
+  }
+
+
+  .xray-telemetry {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(120px, 1fr));
+    gap: 10px;
+    margin: 0 0 16px;
+  }
+  .xray-metric {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: rgba(10,12,15,.42);
+  }
+  .xray-metric span {
+    display: block;
+    color: var(--muted);
+    font: 700 10px "JetBrains Mono", monospace;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .xray-metric strong {
+    display: block;
+    margin-top: 5px;
+    color: var(--bright);
+    font: 800 18px "JetBrains Mono", monospace;
+  }
+  .xray-debug-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .xray-transcript {
+    display: grid;
+    gap: 8px;
+  }
+  .xray-event {
+    padding: 9px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(10,12,15,.42);
+  }
+  .xray-event strong {
+    display: block;
+    color: var(--cyan);
+    font: 700 10px "JetBrains Mono", monospace;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .xray-event span {
+    display: block;
+    margin-top: 4px;
+    color: var(--text);
+    font-size: 12.5px;
+    line-height: 1.45;
+  }
+  .xray-event small {
+    display: block;
+    margin-top: 5px;
+    color: var(--muted);
+    font: 700 10px "JetBrains Mono", monospace;
+  }
+  .xray-redaction {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border: 1px solid rgba(251,191,36,.35);
+    border-left: 3px solid var(--amber);
+    border-radius: 8px;
+    background: rgba(251,191,36,.08);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .xray-redaction strong {
+    color: var(--amber);
+  }
+  body[data-theme="light"] .xray-metric,
+  body[data-theme="light"] .xray-event {
+    background: #ffffff;
+    border-color: var(--border2);
+  }
+
+
+  @media (max-width: 900px) {
+    body { display: block; }
+    .page-header {
+      padding-right: 0;
+      padding-top: 52px;
+      min-height: 0;
+    }
+    .top-actions {
+      gap: 8px;
+      padding: 6px;
+    }
+    .agent-mode {
+      padding-right: 6px;
+    }
+    .agent-mode-label,
+    .display-mode-label {
+      display: none;
+    }
+    nav {
+      position: static;
+      width: auto;
+      min-width: 0;
+      height: auto;
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    main { width: 100%; padding: 32px 20px 72px; }
+    .map-grid, .code-pair, .source-grid, .xray-head, .xray-panel-grid, .xray-debug-grid { grid-template-columns: 1fr; }
+    .pipeline, .xray-flow, .xray-telemetry { grid-template-columns: 1fr; }
+    .xray-input-row { grid-template-columns: 1fr; }
+    .pipeline-step { min-height: auto; }
+    .pipeline-step:not(:last-child)::after {
+      content: "v";
+      top: auto;
+      right: 16px;
+      bottom: -16px;
+      transform: none;
+    }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Hermes Runtime<br>X-Ray</div>
+  <div class="nav-section">Overview</div>
+  <a href="#overview">Runtime Model</a>
+  <a href="#xray">Hermes Runtime X-Ray</a>
+  <a href="#sources">Source Anchors</a>
+  <div class="nav-section">The Five Parts</div>
+  <a href="#input">1. Platform Input</a>
+  <a href="#hydration">2. Session Hydration</a>
+  <a href="#loop">3. Agent Loop</a>
+  <a href="#dispatch">4. Tool Dispatch</a>
+  <a href="#persistence">5. Persistence</a>
+  <div class="nav-section">Takeaways</div>
+  <a href="#coordination">Coordination</a>
+</nav>
+
+<main>
+  <header class="page-header">
+    <div class="top-actions" aria-label="Page tools">
+      <div class="agent-mode" aria-label="Agent-readable exports">
+        <span class="agent-mode-label">Agent mode</span>
+        <a href="llms.txt" title="Open llms.txt">llms.txt</a>
+        <a href="hermes-xray.json" title="Open Hermes X-Ray JSON export">.json</a>
+      </div>
+      <div class="display-mode">
+        <span class="display-mode-label">Display</span>
+        <div class="theme-toggle" role="group" aria-label="Color mode">
+          <button type="button" data-theme-choice="dark" aria-label="Use night mode" title="Night mode" aria-pressed="true">☾</button>
+          <button type="button" data-theme-choice="light" aria-label="Use day mode" title="Day mode" aria-pressed="false">☀</button>
+        </div>
+      </div>
+    </div>
+    <h1>Hermes Runtime X-Ray</h1>
+    <p class="subtitle">// Type a simple prompt, then watch the agent loop expose intent, tools, evidence, and verification.</p>
+  </header>
+
+  <p id="overview">Modern tool-using agents tend to converge on the same runtime shape. A platform event is normalized into a session, prior state is assembled into model context, the model runs a loop, tool calls are dispatched, and the resulting transcript is persisted for the next turn. This page uses <strong>NousResearch/hermes-agent</strong> and <strong>openclaw/openclaw</strong> as concrete implementations of that standard pattern.</p>
+
+  <p>The examples are intentionally compact. They are source-shaped excerpts and reconstructions that preserve the real filenames, public class/function names, and data flow while leaving out surrounding product code, error branches, and provider-specific details.</p>
+
+  <div class="hero" aria-label="Five-part agent runtime pipeline">
+    <div class="flow-rail">Inbound event</div>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <span class="num">01</span>
+        <span class="label">Platform input</span>
+        <span class="detail">platform/session identity</span>
+      </div>
+      <div class="pipeline-step">
+        <span class="num">02</span>
+        <span class="label">Session hydration</span>
+        <span class="detail">prompt + message history</span>
+      </div>
+      <div class="pipeline-step">
+        <span class="num">03</span>
+        <span class="label">Agent loop</span>
+        <span class="detail">reasoning turn + stop policy</span>
+      </div>
+      <div class="pipeline-step">
+        <span class="num">04</span>
+        <span class="label">Tool dispatch</span>
+        <span class="detail">schema, policy, execution</span>
+      </div>
+      <div class="pipeline-step">
+        <span class="num">05</span>
+        <span class="label">Persistence</span>
+        <span class="detail">transcript / memory</span>
+      </div>
+    </div>
+    <div class="flow-rail">Outbound response</div>
+    <div class="runtime-lines">
+      <div><span>Hermes:</span><span>Python gateway + AIAgent + tools.registry + SQLite session DB</span></div>
+      <div><span>OpenClaw:</span><span>TypeScript ACP/session layer + CoreAgentHarness + agentLoop + JSONL session tree</span></div>
+    </div>
+  </div>
+
+  <div class="map-grid">
+    <div class="map-card">
+      <h3>Hermes Agent</h3>
+      <p>Hermes keeps a large Python runtime around <code>AIAgent</code>. The gateway builds <code>SessionSource</code> objects, adapters inherit <code>BasePlatformAdapter</code>, the loop lives behind <code>agent.conversation_loop.run_conversation</code>, tools self-register in <code>tools.registry</code>, and session rows are appended through <code>SessionDB.append_message</code>.</p>
+    </div>
+    <div class="map-card">
+      <h3>OpenClaw</h3>
+      <p>OpenClaw separates reusable TypeScript packages. <code>@openclaw/agent-core</code> owns <code>CoreAgentHarness</code>, <code>agentLoop</code>, session context building, tool execution, and JSONL-backed session storage. ACP/runtime types and session stores bind external clients to stable <code>sessionKey</code> handles.</p>
+    </div>
+  </div>
+
+  <section class="xray-lab" id="xray" aria-labelledby="xray-title">
+    <div class="xray-head">
+      <div>
+        <div class="xray-kicker">Interactive slice</div>
+        <h2 id="xray-title">Send a simple prompt. Inspect the runtime path.</h2>
+        <p>Inspired by the standalone Agent Runtime explainer, this is a separate runtime observability lab. It turns a plain request into an inspectable agent trace without exposing hidden chain-of-thought, secrets, or private session fragments.</p>
+        <span class="xray-prompt-chip" id="xrayPromptChip">Prompt: Review the portfolio-site deploy checklist</span>
+      </div>
+      <form class="xray-console" id="xrayForm">
+        <label for="xrayPrompt">Try a simple request</label>
+        <div class="xray-input-row">
+          <input id="xrayPrompt" name="prompt" value="Review the portfolio-site deploy checklist" maxlength="120" autocomplete="off">
+          <button type="submit">Trace</button>
+        </div>
+        <p class="xray-safe">The trace shows operational evidence: intent, selected tools, file/code landmarks, and verification. It deliberately does not show private reasoning tokens.</p>
+      </form>
+    </div>
+
+    <div class="xray-telemetry" aria-label="Runtime telemetry">
+      <div class="xray-metric"><span>Loop</span><strong id="xrayLoopMetric">1 / 3</strong></div>
+      <div class="xray-metric"><span>Prompt tokens</span><strong id="xrayPromptTokens">8</strong></div>
+      <div class="xray-metric"><span>Tool calls</span><strong id="xrayToolMetric">0</strong></div>
+      <div class="xray-metric"><span>Stop reason</span><strong id="xrayStopMetric">intake</strong></div>
+    </div>
+
+    <div class="xray-flow" aria-label="Hermes runtime trace stages">
+      <div class="xray-node active" data-xray-node="input"><span class="num">01</span><span class="title">Prompt intake</span><span class="mini">Normalize request + session source</span></div>
+      <div class="xray-node" data-xray-node="context"><span class="num">02</span><span class="title">Context build</span><span class="mini">Memory, skills, history, constraints</span></div>
+      <div class="xray-node" data-xray-node="plan"><span class="num">03</span><span class="title">Loop policy</span><span class="mini">Choose tools + safety rails</span></div>
+      <div class="xray-node" data-xray-node="tools"><span class="num">04</span><span class="title">Tool dispatch</span><span class="mini">Execute, observe, adapt</span></div>
+      <div class="xray-node" data-xray-node="verify"><span class="num">05</span><span class="title">Verify + persist</span><span class="mini">Check result, save useful state</span></div>
+    </div>
+
+    <div class="xray-stage-buttons" aria-label="Inspect runtime stage">
+      <button type="button" class="xray-stage-button" data-xray-stage="input" aria-pressed="true">Prompt</button>
+      <button type="button" class="xray-stage-button" data-xray-stage="context" aria-pressed="false">Context</button>
+      <button type="button" class="xray-stage-button" data-xray-stage="plan" aria-pressed="false">Policy</button>
+      <button type="button" class="xray-stage-button" data-xray-stage="tools" aria-pressed="false">Tools</button>
+      <button type="button" class="xray-stage-button" data-xray-stage="verify" aria-pressed="false">Verify</button>
+    </div>
+
+    <div class="xray-panel-grid">
+      <div class="xray-card">
+        <h3 id="xrayStageTitle">01 Prompt intake</h3>
+        <div class="xray-card-body">
+          <ul class="xray-list" id="xrayEvidence"></ul>
+          <div class="xray-redaction"><strong>Boundary:</strong> this view can show model-visible prompts, loop state, tool calls, token accounting, and observable rationale summaries. It does not expose hidden chain-of-thought or secrets.</div>
+        </div>
+      </div>
+      <div class="xray-card">
+        <h3>Source-shaped landmark</h3>
+        <pre class="xray-code" id="xrayCode"></pre>
+      </div>
+    </div>
+
+    <div class="xray-debug-grid">
+      <div class="xray-card">
+        <h3>Model-visible prompt stack</h3>
+        <pre class="xray-code" id="xrayPromptStack"></pre>
+      </div>
+      <div class="xray-card">
+        <h3>Observable event stream</h3>
+        <div class="xray-card-body xray-transcript" id="xrayTranscript"></div>
+      </div>
+    </div>
+  </section>
+
+
+  <h2 id="sources">Source Anchors</h2>
+  <div class="source-grid">
+    <div class="source-card">
+      <h3>Hermes Python</h3>
+      <ul>
+        <li><code>run_agent.py</code> - <code>AIAgent</code>, persistence hooks, tool-call forwarding.</li>
+        <li><code>agent/conversation_loop.py</code> - max-iteration loop and provider calls.</li>
+        <li><code>agent/tool_executor.py</code> - sequential/concurrent tool execution.</li>
+        <li><code>tools/registry.py</code> - self-registering tool schemas and dispatch.</li>
+        <li><code>gateway/session.py</code> and <code>gateway/platforms/base.py</code> - message source and adapter boundary.</li>
+      </ul>
+    </div>
+    <div class="source-card">
+      <h3>OpenClaw TypeScript</h3>
+      <ul>
+        <li><code>packages/agent-core/src/agent-loop.ts</code> - core LLM/tool loop.</li>
+        <li><code>packages/agent-core/src/harness/agent-harness.ts</code> - session hydration, hooks, persistence.</li>
+        <li><code>packages/agent-core/src/harness/session/session.ts</code> - context assembly from session branch.</li>
+        <li><code>packages/agent-core/src/harness/session/jsonl-storage.ts</code> - append-only JSONL storage.</li>
+        <li><code>packages/acp-core/src/session.ts</code> and <code>runtime/types.ts</code> - runtime session handles.</li>
+      </ul>
+    </div>
+  </div>
+
+  <section class="part" id="input">
+    <div class="eyebrow">Part 1</div>
+    <h2>Platform Input</h2>
+    <p>Hermes has direct messaging adapters. OpenClaw exposes runtime/session contracts that let platform clients deliver turns through stable handles. Both normalize an external event into a session identity before the model sees anything.</p>
+
+    <div class="code-pair">
+      <div class="code-card hermes">
+        <div class="code-title"><span>Hermes Python</span><span>gateway/session.py, gateway/platforms/base.py</span></div>
+<pre><code>@dataclass
+class SessionSource:
+    platform: Platform
+    chat_id: str
+    chat_type: str = "dm"
+    user_id: Optional[str] = None
+    user_name: Optional[str] = None
+    thread_id: Optional[str] = None
+    message_id: Optional[str] = None
+    profile: Optional[str] = None
+
+class BasePlatformAdapter(ABC):
+    supports_async_delivery: bool = True
+    splits_long_messages: bool = False
+
+    def set_message_handler(self, handler: MessageHandler) -&gt; None:
+        self._message_handler = handler
+
+    async def handle_message(self, event: MessageEvent) -&gt; None:
+        session_key = event.source.session_key
+        if session_key in self._active_sessions:
+            self._pending_messages[session_key] = event
+            return
+        task = asyncio.create_task(
+            self._process_message_background(event, session_key)
+        )
+        self._session_tasks[session_key] = task
+
+    @abstractmethod
+    async def start(self) -&gt; None: ...
+
+    @abstractmethod
+    async def send(self, chat_id: str, text: str, metadata=None) -&gt; None: ...</code></pre>
+      </div>
+
+      <div class="code-card openclaw">
+        <div class="code-title"><span>OpenClaw TypeScript</span><span>packages/acp-core/src/runtime/types.ts, session.ts</span></div>
+<pre><code>export type AcpRuntimeHandle = {
+  sessionKey: string;
+  backend: string;
+  runtimeSessionName: string;
+  cwd?: string;
+  backendSessionId?: string;
+  agentSessionId?: string;
+};
+
+export type AcpRuntimeTurnInput = {
+  handle: AcpRuntimeHandle;
+  text: string;
+  attachments?: AcpRuntimeTurnAttachment[];
+  mode: "prompt" | "steer";
+  requestId: string;
+  signal?: AbortSignal;
+};
+
+export function createInMemorySessionStore(): AcpSessionStore {
+  const sessions = new Map&lt;string, AcpSession&gt;();
+
+  const createSession = (params) =&gt; {
+    const sessionId = params.sessionId ?? randomUUID();
+    const existing = sessions.get(sessionId);
+    if (existing) {
+      existing.sessionKey = params.sessionKey;
+      existing.cwd = params.cwd;
+      return existing;
+    }
+    const session = { sessionId, sessionKey: params.sessionKey, cwd: params.cwd };
+    sessions.set(sessionId, session);
+    return session;
+  };
+
+  return { createSession, getSession, cancelActiveRun, deleteSession };
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="part" id="hydration">
+    <div class="eyebrow">Part 2</div>
+    <h2>Session Hydration</h2>
+    <p>Hydration is where prior state becomes model-visible context. Hermes passes prior conversation history into <code>run_conversation</code> and can compress context. OpenClaw makes this explicit: <code>Session.buildContext()</code> walks the active session branch and injects compaction summaries before recent messages.</p>
+
+    <div class="code-pair">
+      <div class="code-card hermes">
+        <div class="code-title"><span>Hermes Python</span><span>run_agent.py</span></div>
+<pre><code>class AIAgent:
+    def run_conversation(
+        self,
+        user_message: str,
+        system_message: str = None,
+        conversation_history: List[Dict[str, Any]] = None,
+        task_id: str = None,
+        stream_callback: Optional[callable] = None,
+        persist_user_message: Optional[str] = None,
+        persist_user_timestamp: Optional[float] = None,
+        moa_config: Optional[dict[str, Any]] = None,
+    ) -&gt; Dict[str, Any]:
+        from agent.conversation_loop import run_conversation
+        return run_conversation(
+            self,
+            user_message,
+            system_message,
+            conversation_history,
+            task_id,
+            stream_callback,
+            persist_user_message,
+            persist_user_timestamp=persist_user_timestamp,
+            moa_config=moa_config,
+        )
+
+    def _compress_context(self, messages, system_message, *, approx_tokens=None):
+        from agent.conversation_compression import compress_context
+        return compress_context(
+            self, messages, system_message, approx_tokens=approx_tokens
+        )</code></pre>
+      </div>
+
+      <div class="code-card openclaw">
+        <div class="code-title"><span>OpenClaw TypeScript</span><span>packages/agent-core/src/harness/session/session.ts</span></div>
+<pre><code>export function buildSessionContext(pathEntries: SessionTreeEntry[]): SessionContext {
+  let compaction: CompactionEntry | null = null;
+  for (const entry of pathEntries) {
+    if (entry.type === "compaction") compaction = entry;
+  }
+
+  const messages: AgentMessage[] = [];
+  const appendMessage = (entry: SessionTreeEntry) =&gt; {
+    if (entry.type === "message") messages.push(entry.message);
+    if (entry.type === "branch_summary" &amp;&amp; entry.summary) {
+      messages.push(asAgentMessage(createBranchSummaryMessage(entry.summary)));
+    }
+  };
+
+  if (compaction) {
+    messages.push(asAgentMessage(
+      createCompactionSummaryMessage(
+        compaction.summary,
+        compaction.tokensBefore,
+        compaction.timestamp,
+      ),
+    ));
+    const compactionIdx = pathEntries.findIndex(
+      (e) =&gt; e.type === "compaction" &amp;&amp; e.id === compaction.id,
+    );
+    let foundFirstKept = false;
+    for (let i = 0; i &lt; compactionIdx; i++) {
+      const entry = pathEntries[i];
+      if (entry.id === compaction.firstKeptEntryId) foundFirstKept = true;
+      if (foundFirstKept) appendMessage(entry);
+    }
+    for (let i = compactionIdx + 1; i &lt; pathEntries.length; i++) {
+      appendMessage(pathEntries[i]);
+    }
+  } else {
+    for (const entry of pathEntries) appendMessage(entry);
+  }
+
+  return { messages, thinkingLevel, model };
+}
+
+export class Session {
+  async buildContext(): Promise&lt;SessionContext&gt; {
+    return buildSessionContext(await this.getBranch());
+  }
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="part" id="loop">
+    <div class="eyebrow">Part 3</div>
+    <h2>Agent Loop</h2>
+    <p>The loop is the think/act cycle. Hermes counts API calls against <code>agent.max_iterations</code> and forwards assistant tool calls to the executor. OpenClaw's <code>runLoop</code> continues while tool calls or steering messages exist, then emits <code>agent_end</code>.</p>
+
+    <div class="code-pair">
+      <div class="code-card hermes">
+        <div class="code-title"><span>Hermes Python</span><span>agent/conversation_loop.py, run_agent.py</span></div>
+<pre><code>def run_conversation(agent, user_message, system_message=None,
+                     conversation_history=None, task_id=None, *args, **kwargs):
+    messages = list(conversation_history or [])
+    messages.append({"role": "user", "content": user_message})
+    api_call_count = 0
+
+    while (
+        api_call_count &lt; agent.max_iterations
+        and agent.iteration_budget.remaining &gt; 0
+    ) or agent._budget_grace_call:
+        api_call_count += 1
+        agent._api_call_count = api_call_count
+
+        # provider request/stream handling builds the assistant message here
+        messages.append(assistant_message)
+
+        if getattr(assistant_message, "tool_calls", None):
+            agent._execute_tool_calls(
+                assistant_message, messages, task_id, api_call_count
+            )
+            agent._persist_session(messages, conversation_history)
+            continue
+
+        agent._persist_session(messages, conversation_history)
+        return {"response": assistant_message.content, "messages": messages}
+
+    return agent._handle_max_iterations(messages, api_call_count)</code></pre>
+      </div>
+
+      <div class="code-card openclaw">
+        <div class="code-title"><span>OpenClaw TypeScript</span><span>packages/agent-core/src/agent-loop.ts</span></div>
+<pre><code>async function runLoop(
+  initialContext: AgentContext,
+  newMessages: AgentMessage[],
+  initialConfig: AgentLoopConfig,
+  signal: AbortSignal | undefined,
+  emit: AgentEventSink,
+): Promise&lt;void&gt; {
+  let currentContext = initialContext;
+  let pendingMessages = (await initialConfig.getSteeringMessages?.()) || [];
+
+  while (true) {
+    let hasMoreToolCalls = true;
+
+    while (hasMoreToolCalls || pendingMessages.length &gt; 0) {
+      for (const message of pendingMessages) {
+        currentContext.messages.push(message);
+        newMessages.push(message);
+      }
+
+      const message = await streamAssistantResponse(
+        currentContext, initialConfig, signal, emit,
+      );
+      newMessages.push(message);
+
+      const toolCalls = message.content.filter((c) =&gt; c.type === "toolCall");
+      hasMoreToolCalls = false;
+      if (message.stopReason === "toolUse" &amp;&amp; toolCalls.length &gt; 0) {
+        const batch = await executeToolCalls(
+          currentContext, message, initialConfig, signal, emit,
+        );
+        for (const result of batch.messages) currentContext.messages.push(result);
+        hasMoreToolCalls = !batch.terminate;
+      }
+
+      if (await initialConfig.shouldStopAfterTurn?.({ message, context: currentContext })) {
+        await emit({ type: "agent_end", messages: newMessages });
+        return;
+      }
+      pendingMessages = (await initialConfig.getSteeringMessages?.()) || [];
+    }
+    break;
+  }
+  await emit({ type: "agent_end", messages: newMessages });
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="part" id="dispatch">
+    <div class="eyebrow">Part 4</div>
+    <h2>Tool Dispatch</h2>
+    <p>Both projects keep schemas and execution separate from the LLM loop. Hermes uses a singleton registry populated by top-level <code>registry.register()</code> calls. OpenClaw resolves tool calls from the current context, validates/blocks them through hooks, and runs sequentially or in parallel depending on policy.</p>
+
+    <div class="code-pair">
+      <div class="code-card hermes">
+        <div class="code-title"><span>Hermes Python</span><span>tools/registry.py, tools/memory_tool.py</span></div>
+<pre><code>class ToolRegistry:
+    def __init__(self):
+        self._tools: Dict[str, ToolEntry] = {}
+        self._lock = threading.RLock()
+
+    def register(self, name, toolset, schema, handler, check_fn=None,
+                 is_async=False, description="", emoji="", override=False):
+        with self._lock:
+            self._tools[name] = ToolEntry(
+                name=name,
+                toolset=toolset,
+                schema=schema,
+                handler=handler,
+                check_fn=check_fn,
+                is_async=is_async,
+                description=description or schema.get("description", ""),
+                emoji=emoji,
+            )
+
+    def get_definitions(self, tool_names: Set[str]) -&gt; List[dict]:
+        definitions = []
+        for entry in self._snapshot_entries():
+            if entry.name not in tool_names:
+                continue
+            if entry.check_fn and not _check_fn_cached(entry.check_fn):
+                continue
+            schema = {**entry.schema, "name": entry.name}
+            definitions.append({"type": "function", "function": schema})
+        return definitions
+
+    def dispatch(self, name: str, args: dict, **kwargs) -&gt; str:
+        entry = self.get_entry(name)
+        if not entry:
+            return json.dumps({"error": f"Unknown tool: {name}"})
+        try:
+            return entry.handler(args, **kwargs)
+        except Exception as exc:
+            return json.dumps({"error": f"Tool execution failed: {exc}"})
+
+registry.register(
+    name="memory",
+    toolset="memory",
+    schema=MEMORY_SCHEMA,
+    handler=lambda args, **kw: memory_tool(...),
+    check_fn=check_memory_requirements,
+)</code></pre>
+      </div>
+
+      <div class="code-card openclaw">
+        <div class="code-title"><span>OpenClaw TypeScript</span><span>packages/agent-core/src/agent-loop.ts, agent-harness.ts</span></div>
+<pre><code>async function executeToolCalls(
+  currentContext: AgentContext,
+  assistantMessage: AssistantMessage,
+  config: AgentLoopConfig,
+  signal: AbortSignal | undefined,
+  emit: AgentEventSink,
+): Promise&lt;ExecutedToolCallBatch&gt; {
+  const toolCalls = assistantMessage.content.filter((c) =&gt; c.type === "toolCall");
+  const resolvedToolCalls = new Map&lt;AgentToolCall, ResolvedToolCallOutcome&gt;();
+
+  let hasSequentialToolCall = false;
+  if (config.toolExecution !== "sequential") {
+    for (const toolCall of toolCalls) {
+      const resolution = await resolveToolCallTool(
+        currentContext, assistantMessage, toolCall, config, signal, resolvedToolCalls,
+      );
+      if (resolution.kind === "resolved" &amp;&amp; resolution.tool?.executionMode === "sequential") {
+        hasSequentialToolCall = true;
+        break;
+      }
+    }
+  }
+
+  if (config.toolExecution === "sequential" || hasSequentialToolCall) {
+    return executeToolCallsSequential(
+      currentContext, assistantMessage, toolCalls, resolvedToolCalls, config, signal, emit,
+    );
+  }
+
+  return executeToolCallsParallel(
+    currentContext, assistantMessage, toolCalls, resolvedToolCalls, config, signal, emit,
+  );
+}
+
+function createLoopConfig(): AgentLoopConfig {
+  return {
+    beforeToolCall: async ({ toolCall, args }) =&gt;
+      emitHook({ type: "tool_call", toolName: toolCall.name, input: args }),
+    afterToolCall: async ({ toolCall, result, isError }) =&gt;
+      emitHook({
+        type: "tool_result",
+        toolName: toolCall.name,
+        content: result.content,
+        isError,
+      }),
+  };
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="part" id="persistence">
+    <div class="eyebrow">Part 5</div>
+    <h2>Persistence</h2>
+    <p>Hermes writes both a session log and SQLite rows, marking message dictionaries after flush so multiple exit paths do not duplicate rows. OpenClaw records append-only session tree entries to JSONL and rebuilds context by walking the branch.</p>
+
+    <div class="code-pair">
+      <div class="code-card hermes">
+        <div class="code-title"><span>Hermes Python</span><span>run_agent.py</span></div>
+<pre><code>def _persist_session(self, messages: List[Dict], conversation_history=None):
+    self._drop_trailing_empty_response_scaffolding(messages)
+    self._session_messages = messages
+    self._save_session_log(messages)
+    self._flush_messages_to_session_db(messages, conversation_history)
+
+def _flush_messages_to_session_db(self, messages: List[Dict], conversation_history=None):
+    if getattr(self, "_persist_disabled", False) or not self._session_db:
+        return
+
+    history_ids = {id(item) for item in (conversation_history or []) if isinstance(item, dict)}
+
+    for msg in messages:
+        if not isinstance(msg, dict) or msg.get(_DB_PERSISTED_MARKER):
+            continue
+        if id(msg) in history_ids:
+            msg[_DB_PERSISTED_MARKER] = True
+            continue
+
+        self._session_db.append_message(
+            session_id=self.session_id,
+            role=msg.get("role", "unknown"),
+            content=msg.get("content"),
+            tool_name=msg.get("tool_name"),
+            tool_calls=msg.get("tool_calls"),
+            tool_call_id=msg.get("tool_call_id"),
+        )
+        msg[_DB_PERSISTED_MARKER] = True</code></pre>
+      </div>
+
+      <div class="code-card openclaw">
+        <div class="code-title"><span>OpenClaw TypeScript</span><span>session.ts, jsonl-storage.ts</span></div>
+<pre><code>export class Session {
+  private async appendTypedEntry(entry: SessionTreeEntry): Promise&lt;string&gt; {
+    await this.storage.appendEntry(entry);
+    return entry.id;
+  }
+
+  async appendMessage(message: AgentMessage): Promise&lt;string&gt; {
+    return this.appendTypedEntry({
+      type: "message",
+      id: await this.storage.createEntryId(),
+      parentId: await this.getAppendParentId(),
+      timestamp: new Date().toISOString(),
+      message,
+    });
+  }
+}
+
+export class JsonlSessionStorage extends BaseSessionStorage {
+  static async create(fs, filePath, options): Promise&lt;JsonlSessionStorage&gt; {
+    const header = {
+      type: "session",
+      version: 3,
+      id: options.sessionId,
+      timestamp: new Date().toISOString(),
+      cwd: options.cwd,
+      parentSession: options.parentSessionPath,
+    };
+    await fs.writeFile(filePath, `${JSON.stringify(header)}\n`);
+    return new JsonlSessionStorage(fs, filePath, header, [], null, null);
+  }
+
+  override async appendEntry(entry: SessionTreeEntry): Promise&lt;void&gt; {
+    this.validateEntryForAppend(entry);
+    await this.fs.appendFile(this.filePath, `${JSON.stringify(entry)}\n`);
+    this.recordEntry(entry);
+  }
+}</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="part" id="coordination">
+    <div class="eyebrow">Coordination</div>
+    <h2>What the Codebases Have in Common</h2>
+    <table>
+      <tr><th>Runtime Part</th><th>Hermes Agent</th><th>OpenClaw</th></tr>
+      <tr><td>Input boundary</td><td><code>SessionSource</code>, <code>BasePlatformAdapter.handle_message</code>, allowlist mixin</td><td><code>AcpRuntimeHandle</code>, <code>AcpRuntimeTurnInput</code>, in-memory ACP session store</td></tr>
+      <tr><td>Hydration</td><td><code>conversation_history</code>, context compression, memory tools</td><td><code>Session.buildContext()</code>, compaction summaries, active branch replay</td></tr>
+      <tr><td>Agent loop</td><td><code>agent.conversation_loop.run_conversation</code> with <code>max_iterations</code></td><td><code>runLoop()</code> with tool-use, steering, follow-up queues, and stop hooks</td></tr>
+      <tr><td>Tool dispatch</td><td><code>tools.registry.dispatch()</code> plus sequential/concurrent executor modules</td><td><code>executeToolCalls()</code>, deferred resolution, hookable before/after tool policies</td></tr>
+      <tr><td>Persistence</td><td>SQLite <code>append_message</code> plus JSON log, duplicate-write markers</td><td>Append-only JSONL session tree entries</td></tr>
+    </table>
+
+    <div class="callout">
+      <strong>Key difference:</strong> Hermes is a Python product runtime with many pragmatic gateway protections in one large agent surface. OpenClaw factors the same runtime into reusable TypeScript packages, so the harness/session/loop contracts are easier to isolate and test.
+    </div>
+  </section>
+</main>
+<script>
+  (function () {
+    const storageKey = "hermes-xray-theme";
+    const buttons = Array.from(document.querySelectorAll("[data-theme-choice]"));
+    const systemPrefersLight = window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: light)").matches;
+    const saved = localStorage.getItem(storageKey);
+    const initial = saved === "light" || saved === "dark"
+      ? saved
+      : systemPrefersLight ? "light" : "dark";
+
+    function setTheme(theme) {
+      document.body.dataset.theme = theme;
+      localStorage.setItem(storageKey, theme);
+      for (const button of buttons) {
+        button.setAttribute(
+          "aria-pressed",
+          button.dataset.themeChoice === theme ? "true" : "false",
+        );
+      }
+    }
+
+    for (const button of buttons) {
+      button.addEventListener("click", function () {
+        setTheme(button.dataset.themeChoice || "dark");
+      });
+    }
+
+    setTheme(initial);
+  })();
+
+  (function () {
+    const stageData = {
+      input: {
+        title: "01 Prompt intake",
+        evidence: [
+          "Capture the user request as a message event, not as a raw provider call.",
+          "Bind it to a session identity so follow-up steering lands in the same conversation.",
+          "Keep platform metadata outside the model-facing text unless it helps the task.",
+        ],
+        code: function (prompt) { return `SessionSource(platform="cli", chat_id="local", profile="default")\nuser_message = ${JSON.stringify(prompt)}\nagent.run_conversation(user_message, conversation_history=history)`; },
+      },
+      context: {
+        title: "02 Context build",
+        evidence: [
+          "Hydrate durable instructions, relevant memory, loaded skills, and recent messages.",
+          "Compress or summarize old turns before they crowd out the current job.",
+          "Separate public evidence from private or sensitive context.",
+        ],
+        code: function () { return `messages = [system_prompt, ...conversation_history]\nmessages.append({"role": "user", "content": user_message})\nif token_budget_tight:\n    messages = compress_context(messages)`; },
+      },
+      plan: {
+        title: "03 Loop policy",
+        evidence: [
+          "Choose whether to answer directly, call tools, delegate, or ask for clarification.",
+          "Respect tool safety: inspect before editing, verify before declaring success.",
+          "Expose rationale as operational notes, not hidden chain-of-thought.",
+        ],
+        code: function () { return `while api_call_count < agent.max_iterations:\n    assistant_message = provider.complete(messages, tools=tool_defs)\n    if assistant_message.tool_calls:\n        execute_tool_calls(...)\n        continue\n    return final_response`; },
+      },
+      tools: {
+        title: "04 Tool dispatch",
+        evidence: [
+          "Resolve tool schemas from the registry and execute only allowed calls.",
+          "Feed tool observations back into the loop as evidence, not vibes.",
+          "Prefer parallel reads when independent; serialize dependent edits and verification.",
+        ],
+        code: function () { return `definitions = registry.get_definitions(enabled_tools)\nfor call in assistant_message.tool_calls:\n    result = registry.dispatch(call.name, call.arguments)\n    messages.append({"role": "tool", "content": result})`; },
+      },
+      verify: {
+        title: "05 Verify + persist",
+        evidence: [
+          "Run the smallest real check that proves the result works.",
+          "Persist the transcript and tool outputs for continuity.",
+          "Save only durable preferences or reusable workflows, not stale task progress.",
+        ],
+        code: function () { return `agent._persist_session(messages, conversation_history)\nif changed_code:\n    run_build_or_smoke_test()\nreturn {"response": final, "evidence": verification_output}`; },
+      },
+    };
+
+    const form = document.getElementById("xrayForm");
+    const input = document.getElementById("xrayPrompt");
+    const chip = document.getElementById("xrayPromptChip");
+    const title = document.getElementById("xrayStageTitle");
+    const evidence = document.getElementById("xrayEvidence");
+    const code = document.getElementById("xrayCode");
+    const promptStack = document.getElementById("xrayPromptStack");
+    const transcript = document.getElementById("xrayTranscript");
+    const loopMetric = document.getElementById("xrayLoopMetric");
+    const promptTokens = document.getElementById("xrayPromptTokens");
+    const toolMetric = document.getElementById("xrayToolMetric");
+    const stopMetric = document.getElementById("xrayStopMetric");
+    const stageButtons = Array.from(document.querySelectorAll("[data-xray-stage]"));
+    const nodes = Array.from(document.querySelectorAll("[data-xray-node]"));
+    let currentStage = "input";
+
+    function cleanPrompt() {
+      const value = (input && input.value || "").trim();
+      return value || "Review the portfolio-site deploy checklist";
+    }
+
+    function estimateTokens(text) {
+      return Math.max(1, Math.ceil(String(text).trim().length / 4));
+    }
+
+    function eventsFor(prompt, stage) {
+      const base = [
+        { role: "user", text: prompt, meta: `~${estimateTokens(prompt)} prompt tokens` },
+        { role: "runtime", text: "Hydrate system instructions, relevant skills, memory, and recent transcript.", meta: "context window assembled" },
+      ];
+      if (["plan", "tools", "verify"].includes(stage)) {
+        base.push({ role: "assistant-visible", text: "Operational rationale summary: inspect repo state, use read/search tools before edits, verify with build and route smoke checks.", meta: "summary, not hidden reasoning" });
+      }
+      if (["tools", "verify"].includes(stage)) {
+        base.push({ role: "tool_call", text: "search_files / read_file / terminal / patch", meta: "tool schemas selected from registry" });
+        base.push({ role: "tool_result", text: "File evidence and command output return to the message list for the next loop iteration.", meta: "observable evidence" });
+      }
+      if (stage === "verify") {
+        base.push({ role: "verification", text: "Build passes, affected route returns expected content, event stream remains explainable.", meta: "stop reason: complete" });
+      }
+      return base;
+    }
+
+    function promptStackFor(prompt) {
+      return [
+        "SYSTEM: You are Hermes. Use tools, verify, protect secrets.",
+        "DEVELOPER: Show operational trace; do not reveal hidden chain-of-thought.",
+        "MEMORY: User prefers action, verification, candid pushback. [redacted summary]",
+        "SKILLS: portfolio-project-onboarding, web-app-local-verification, code sync",
+        `USER: ${prompt}`,
+      ].join("\n\n");
+    }
+
+    function render(stage) {
+      const data = stageData[stage] || stageData.input;
+      const prompt = cleanPrompt();
+      currentStage = stage;
+      chip.textContent = `Prompt: ${prompt}`;
+      title.textContent = data.title;
+      evidence.innerHTML = "";
+      for (const item of data.evidence) {
+        const li = document.createElement("li");
+        li.textContent = item;
+        evidence.appendChild(li);
+      }
+      code.textContent = data.code(prompt);
+      promptStack.textContent = promptStackFor(prompt);
+      const events = eventsFor(prompt, stage);
+      transcript.innerHTML = "";
+      for (const event of events) {
+        const item = document.createElement("div");
+        item.className = "xray-event";
+        const role = document.createElement("strong");
+        role.textContent = event.role;
+        const text = document.createElement("span");
+        text.textContent = event.text;
+        const meta = document.createElement("small");
+        meta.textContent = event.meta;
+        item.append(role, text, meta);
+        transcript.appendChild(item);
+      }
+      const stageIndex = ["input", "context", "plan", "tools", "verify"].indexOf(stage);
+      loopMetric.textContent = `${Math.max(1, Math.min(3, stageIndex))} / 3`;
+      promptTokens.textContent = String(estimateTokens(prompt));
+      toolMetric.textContent = ["tools", "verify"].includes(stage) ? "4" : "0";
+      stopMetric.textContent = stage === "verify" ? "complete" : stage;
+      for (const button of stageButtons) {
+        button.setAttribute("aria-pressed", button.dataset.xrayStage === stage ? "true" : "false");
+      }
+      for (const node of nodes) {
+        node.classList.toggle("active", node.dataset.xrayNode === stage);
+      }
+    }
+
+    for (const button of stageButtons) {
+      button.addEventListener("click", function () {
+        render(button.dataset.xrayStage || "input");
+      });
+    }
+    for (const node of nodes) {
+      node.addEventListener("click", function () {
+        render(node.dataset.xrayNode || "input");
+      });
+    }
+    if (form) {
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        render("input");
+      });
+    }
+    if (input) {
+      input.addEventListener("input", function () {
+        render(currentStage);
+      });
+    }
+    render("input");
+  })();
+</script>
+</body>
+</html>
