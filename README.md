@@ -8,6 +8,8 @@ Debugger-style end-to-end trace of a prompt through [Hermes Agent](https://githu
 - **Panes:** call stack, locals/watches, timeline/event stream, source/stage detail
 - **Pipeline strip:** inbound → hydrate → model → resolve → execute → persist → loop
 - **Analyze your own prompt:** offline demo, Site Gemini (portfolio free-tier key), or bring-your-own API key
+- **Fun mode** (`/funmode`): plain-English story timeline with looping turn boxes ending in the final response
+- **API key safety:** warnings + basic paste checks on both Debugger and Fun mode
 
 ## Run locally
 
@@ -26,9 +28,9 @@ npm run build && npm start
 
 ## Inference notes
 
-- Offline demo never calls a model (top bar shows `scripted-demo`)
-- **Site Gemini** uses server `GEMINI_API_KEY` + `GEMINI_MODEL` (default `gemini-2.0-flash-lite`)
-- **Your API key** supports Google / OpenAI / xAI; keys stay in the browser
+- **This site's Gemini** (recommended): visitors run live demos on the host `GEMINI_API_KEY`. The key stays on the server and is never shown in the browser.
+- **Offline demo**: canned trace, no API
+- **Visitor's own API key**: optional/advanced only
 - ChatGPT / SuperGrok account OAuth cannot grant third-party API inference
 
 ## Project layout

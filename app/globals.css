@@ -483,6 +483,13 @@ kbd {
   text-overflow: ellipsis;
 }
 
+.titlebar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
 .titlebar-meta {
   display: flex;
   gap: 10px;
@@ -1028,3 +1035,338 @@ kbd {
     max-height: 240px;
   }
 }
+
+/* ── Site nav ──────────────────────────────────────────── */
+
+.site-nav {
+  display: inline-flex;
+  gap: 4px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.site-nav a {
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-decoration: none;
+  color: var(--text-dim);
+  border-radius: var(--radius);
+}
+
+.site-nav a:hover {
+  color: var(--text);
+  background: var(--bg-elevated);
+}
+
+.site-nav a.active {
+  color: #e8ffe9;
+  background: var(--accent-dim);
+}
+
+/* ── API key security ──────────────────────────────────── */
+
+.key-security {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #5a4030;
+  border-radius: var(--radius);
+  background: #1a1510;
+}
+
+.key-security.compact {
+  margin-top: 10px;
+}
+
+.key-security-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--warn);
+  margin-bottom: 6px;
+}
+
+.key-security-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #d4c48a;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.key-security-checks {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid var(--error);
+  background: #2a1515;
+  color: #f0b4b4;
+  font-size: 11px;
+}
+
+.key-security-checks ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+.key-security-ack {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.key-security-ack input {
+  margin-top: 2px;
+}
+
+.key-security-nudge {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: #c9a227;
+}
+
+.key-security-ok {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: var(--accent-text);
+}
+
+/* ── Fun mode ──────────────────────────────────────────── */
+
+.fun-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 500px at 10% -10%, #1a2a1c 0%, transparent 55%),
+    var(--bg);
+}
+
+.fun-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #161c22 0%, #12171c 100%);
+}
+
+.fun-header-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.fun-header h1 {
+  margin: 0 0 4px;
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--accent-text);
+}
+
+.fun-header p {
+  margin: 0;
+  max-width: 40rem;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.fun-controls {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+  display: grid;
+  gap: 8px;
+}
+
+.fun-playback {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.fun-playback button {
+  padding: 5px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.fun-playback button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.fun-playback button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.fun-progress {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-left: 4px;
+}
+
+.fun-timeline {
+  flex: 1;
+  padding: 16px;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.fun-empty {
+  color: var(--text-dim);
+  font-size: 14px;
+  padding: 24px 8px;
+}
+
+.fun-act {
+  margin-bottom: 22px;
+}
+
+.fun-act h2 {
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fun-loop {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #12181e;
+  position: relative;
+}
+
+.fun-loop::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 42px;
+  bottom: 28px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--accent-dim), transparent);
+  opacity: 0.7;
+}
+
+.fun-loop-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-dim);
+  color: #e8ffe9;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.fun-loop-end {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  text-align: right;
+}
+
+.fun-boxes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fun-box {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-panel);
+  animation: fun-in 0.35s ease both;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.fun-box.kind-arrive {
+  border-left: 3px solid var(--user);
+}
+.fun-box.kind-prep {
+  border-left: 3px solid var(--text-faint);
+}
+.fun-box.kind-loop,
+.fun-box.kind-loop_back {
+  border-left: 3px solid var(--accent);
+}
+.fun-box.kind-think {
+  border-left: 3px solid var(--assistant);
+}
+.fun-box.kind-tool,
+.fun-box.kind-result {
+  border-left: 3px solid var(--tool);
+}
+.fun-box.kind-save {
+  border-left: 3px solid var(--warn);
+}
+.fun-box.finale,
+.fun-box.kind-finale {
+  border-left: 3px solid var(--accent-text);
+  background: #152018;
+}
+
+.fun-box-title {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.fun-box-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  white-space: pre-wrap;
+}
+
+.fun-box.finale .fun-box-body {
+  color: var(--text);
+  font-size: 15px;
+}
+
+@keyframes fun-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 720px) {
+  .fun-header-top {
+    flex-direction: column;
+  }
+
+  .fun-loop::before {
+    display: none;
+  }
+}
+

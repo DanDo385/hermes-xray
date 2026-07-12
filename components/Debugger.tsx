@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthPanel, useAuthSettings } from "@/components/AuthPanel";
+import { SiteNav } from "@/components/SiteNav";
 import { DEMO_PROMPT } from "@/lib/demo-trace";
 import { eventTypeLabel, type HermesTrace } from "@/lib/events";
 import { getScriptedTrace } from "@/lib/live-adapter";
@@ -48,9 +49,11 @@ export function Debugger() {
     if (live) return trace.model;
     if (auth.mode === "portfolio") return portfolioModel;
     if (auth.mode === "byok") {
-      if (auth.byokProvider === "google") return `${portfolioModel} (your key)`;
-      if (auth.byokProvider === "openai") return "openai (your key)";
-      return "xai (your key)";
+      if (auth.byokProvider === "google") {
+        return `${portfolioModel} (visitor key)`;
+      }
+      if (auth.byokProvider === "openai") return "openai (visitor key)";
+      return "xai (visitor key)";
     }
     return trace.model === "gpt-5.5" ? "scripted-demo" : trace.model;
   })();
@@ -270,12 +273,15 @@ export function Debugger() {
             Watch a prompt move through Hermes — one debugger step at a time
           </span>
         </div>
-        <div className="titlebar-meta">
-          <span title="Model for this run / selected mode">{displayModel}</span>
-          <span title="Platform / provider">{displayPlatform}</span>
-          <span title="Current event in the trace">
-            step {index < 0 ? "—" : `${index + 1} / ${trace.events.length}`}
-          </span>
+        <div className="titlebar-right">
+          <SiteNav />
+          <div className="titlebar-meta">
+            <span title="Model for this run / selected mode">{displayModel}</span>
+            <span title="Platform / provider">{displayPlatform}</span>
+            <span title="Current event in the trace">
+              step {index < 0 ? "—" : `${index + 1} / ${trace.events.length}`}
+            </span>
+          </div>
         </div>
       </header>
 
@@ -283,8 +289,8 @@ export function Debugger() {
         <div className="start-here-title">Start here</div>
         <ol className="start-here-steps">
           <li>
-            <strong>1.</strong> Pick <em>Site Gemini</em> (free test) or{" "}
-            <em>Your API key</em> below — or stay on Offline demo.
+            <strong>1.</strong> Pick <em>This site&apos;s Gemini</em> for a free
+            live test (visitors need no key), or stay on offline demo.
           </li>
           <li>
             <strong>2.</strong> Enter your prompt, then click{" "}

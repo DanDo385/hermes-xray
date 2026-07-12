@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ApiKeySecurity } from "@/components/ApiKeySecurity";
 import {
   DEFAULT_AUTH,
   loadAuthSettings,
@@ -34,9 +35,14 @@ export function AuthPanel({
     fetch("/api/auth/status")
       .then((r) => r.json())
       .then((data: StatusPayload) => {
-        if (!cancelled) {
-          setStatus(data);
-          onStatus?.(data);
+        if (cancelled) return;
+        setStatus(data);
+        onStatus?.(data);
+        // If they wanted hosted demo but the server key isn't set, fall back.
+        if (!data.portfolioGemini && settings.mode === "portfolio") {
+          const next = { ...settings, mode: "scripted" as const };
+          saveAuthSettings(next);
+          onChange(next);
         }
       })
       .catch(() => {
@@ -48,7 +54,9 @@ export function AuthPanel({
     return () => {
       cancelled = true;
     };
-  }, [onStatus]);
+    // intentionally run once on mount for status + fallback
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const update = (patch: Partial<AuthSettings>) => {
     const next = { ...settings, ...patch };
@@ -65,17 +73,39 @@ export function AuthPanel({
     <section className="keys-panel" aria-label="API keys and live test">
       <div className="keys-panel-head">
         <div>
-          <h2>Analyze your own prompt</h2>
+          <h2>Try a live prompt</h2>
           <p>
-            Use this site&apos;s cheapest Google Gemini model for a quick live
-            test, or paste your own API key. The offline demo never calls a
-            model (that&apos;s why the top bar may say{" "}
-            <code>scripted-demo</code>).
+            Visitors are meant to use <strong>this site&apos;s Gemini</strong>{" "}
+            — it runs on the host&apos;s free-tier key on the server. You never
+            see, copy, or download that key. Offline demo needs no model. A
+            visitor-supplied key is optional and rare.
           </p>
         </div>
       </div>
 
       <div className="keys-grid">
+        <button
+          type="button"
+          className={`keys-card${settings.mode === "portfolio" ? " selected" : ""}${!portfolioReady ? " disabled" : ""}`}
+          onClick={() => portfolioReady && selectMode("portfolio")}
+          disabled={!portfolioReady}
+          title={
+            portfolioReady
+              ? `Run on ${portfolioModel} — host key stays on the server`
+              : "Set GEMINI_API_KEY on the server to enable this"
+          }
+        >
+          <span className="keys-card-kicker">Use this (recommended)</span>
+          <span className="keys-card-title">
+            This site&apos;s Gemini · {portfolioModel}
+          </span>
+          <span className="keys-card-body">
+            {portfolioReady
+              ? "Live demo powered by the host’s Google free-tier key. The key never leaves the server — visitors only trigger a run."
+              : "Host hasn’t set GEMINI_API_KEY yet. Offline demo still works."}
+          </span>
+        </button>
+
         <button
           type="button"
           className={`keys-card${settings.mode === "scripted" ? " selected" : ""}`}
@@ -84,30 +114,7 @@ export function AuthPanel({
           <span className="keys-card-kicker">No API</span>
           <span className="keys-card-title">Offline demo</span>
           <span className="keys-card-body">
-            Replay a canned Hermes trace. Good for learning the debugger
-            without spending quota.
-          </span>
-        </button>
-
-        <button
-          type="button"
-          className={`keys-card${settings.mode === "portfolio" ? " selected" : ""}${!portfolioReady ? " disabled" : ""}`}
-          onClick={() => portfolioReady && selectMode("portfolio")}
-          disabled={!portfolioReady}
-          title={
-            portfolioReady
-              ? `Run on ${portfolioModel} via the portfolio Gemini key`
-              : "Set GEMINI_API_KEY on the server to enable this"
-          }
-        >
-          <span className="keys-card-kicker">Recommended test</span>
-          <span className="keys-card-title">
-            Site Gemini · {portfolioModel}
-          </span>
-          <span className="keys-card-body">
-            {portfolioReady
-              ? "Uses the portfolio owner’s Google free-tier key on the cheapest model. Key never leaves the server."
-              : "Not configured yet — add GEMINI_API_KEY on the host, then refresh."}
+            Replay a canned Hermes trace. No network, no quota.
           </span>
         </button>
 
@@ -116,11 +123,11 @@ export function AuthPanel({
           className={`keys-card${settings.mode === "byok" ? " selected" : ""}`}
           onClick={() => selectMode("byok")}
         >
-          <span className="keys-card-kicker">Bring your own</span>
-          <span className="keys-card-title">Your API key</span>
+          <span className="keys-card-kicker">Advanced · optional</span>
+          <span className="keys-card-title">Visitor&apos;s own API key</span>
           <span className="keys-card-body">
-            Paste a Google, OpenAI, or xAI key to analyze your prompt with your
-            own quota. Stored only in this browser.
+            Only if someone prefers their own Google / OpenAI / xAI quota.
+            Not needed for the normal demo. Stored in their browser only.
           </span>
         </button>
       </div>
@@ -172,18 +179,24 @@ export function AuthPanel({
 
       {settings.mode === "portfolio" && portfolioReady ? (
         <p className="auth-ok">
-          Live test ready · {portfolioModel} · type your prompt and click{" "}
-          <strong>Run live</strong>
+          Hosted demo ready · {portfolioModel} · host key stays on the server ·
+          type a prompt and click <strong>Run live</strong>
         </p>
       ) : null}
 
       {settings.mode === "scripted" ? (
         <p className="keys-hint">
           Offline mode selected · click <strong>Load trace</strong> then step
-          with F11. Switch to Site Gemini or Your API key to analyze a custom
-          prompt for real.
+          with F11. Switch to <strong>This site&apos;s Gemini</strong> when you
+          want a real live run on the host key (still never shown in the
+          browser).
         </p>
       ) : null}
+
+      <ApiKeySecurity
+        byokKey={settings.mode === "byok" ? settings.byokKey : ""}
+        compact
+      />
     </section>
   );
 }

@@ -26,7 +26,9 @@ export const PROVIDER_LABELS: Record<InferenceProvider, string> = {
 };
 
 export const DEFAULT_AUTH: AuthSettings = {
-  mode: "scripted",
+  // Prefer hosted Gemini so portfolio visitors run live demos on the host key
+  // (never exposed to the browser). Falls back to scripted if unset.
+  mode: "portfolio",
   byokProvider: "google",
   byokKey: "",
 };
