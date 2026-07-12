@@ -1,39 +1,27 @@
 # Portfolio integration
 
-hermes-xray must remain separate from Agent Runtime.
+hermes-xray is a Next.js App Router debugger for Hermes Agent.
 
-## Asset mapping
+## Preferred: deploy the Next.js app
 
-Copy these files without renaming the Agent Runtime assets:
-
-```text
-hermes-xray/index.html       -> portfolio-site/public/project-assets/hermes-xray/demo/index.html
-hermes-xray/llms.txt         -> portfolio-site/public/project-assets/hermes-xray/demo/llms.txt
-hermes-xray/hermes-xray.json -> portfolio-site/public/project-assets/hermes-xray/demo/hermes-xray.json
+```bash
+npm install
+npm run build
+npm start
 ```
 
-Create independent portfolio surfaces:
+Set on the host:
 
 ```text
-app/demos/hermes-xray/page.tsx
-components/HermesXrayInteractive.tsx
-content/projects/hermes-xray.json
+GEMINI_API_KEY=...
+GEMINI_MODEL=gemini-2.0-flash-lite
 ```
 
-Use:
-
-```text
-project slug: hermes-xray
-demo route: /demos/hermes-xray
-asset iframe: /project-assets/hermes-xray/demo/index.html
+Project slug: `hermes-xray`  
 GitHub: https://github.com/DanDo385/hermes-xray
-```
 
-Do not edit or reuse:
+## Static iframe fallback
 
 ```text
-content/projects/agent-runtime.json
-app/demos/agent-runtime/
-components/AgentRuntimeInteractive.tsx
-public/project-assets/agent-runtime/
+hermes-xray/legacy/index.html  -> portfolio-site/public/project-assets/hermes-xray/demo/index.html
 ```
