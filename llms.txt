@@ -1,4 +1,4 @@
-# Hermes Runtime X-Ray
+# hermes-xray
 
 Standalone browser-based observability demo for a Hermes-style tool-using agent.
 

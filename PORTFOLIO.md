@@ -1,6 +1,6 @@
 # Portfolio integration
 
-Hermes Runtime X-Ray must remain separate from Agent Runtime.
+hermes-xray must remain separate from Agent Runtime.
 
 ## Asset mapping
 

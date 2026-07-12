@@ -1,6 +1,6 @@
-# Hermes Runtime X-Ray
+# hermes-xray
 
-Hermes Runtime X-Ray is a standalone, browser-only observability demo for a Hermes-style tool-using agent.
+hermes-xray is a standalone, browser-only observability demo for a Hermes-style tool-using agent.
 
 Type a simple prompt and inspect the observable runtime path:
 
@@ -14,7 +14,7 @@ The interface shows model-visible prompt context, operational rationale summarie
 
 ## Relationship to Agent Runtime
 
-This is a separate project inspired by [Agent Runtime](https://github.com/DanDo385/agent-runtime), especially its static HTML/CSS presentation and five-part runtime model. Hermes Runtime X-Ray does not replace Agent Runtime and has independent source, history, GitHub repository, portfolio slug, and assets.
+This is a separate project inspired by [Agent Runtime](https://github.com/DanDo385/agent-runtime), especially its static HTML/CSS presentation and five-part runtime model. hermes-xray does not replace Agent Runtime and has independent source, history, GitHub repository, portfolio slug, and assets.
 
 ## Run locally
 
@@ -39,7 +39,7 @@ hermes-xray/
 
 ## Portfolio architecture
 
-Hermes Runtime X-Ray uses its own slug and never overwrites Agent Runtime:
+hermes-xray uses its own slug and never overwrites Agent Runtime:
 
 ```text
 portfolio-site/

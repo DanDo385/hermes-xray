@@ -1,5 +1,5 @@
 {
-  "title": "Hermes Runtime X-Ray",
+  "title": "hermes-xray",
   "description": "An interactive observability explainer for a Hermes-style tool-using agent runtime, with prompt input, loop telemetry, model-visible prompt stack, tool events, token estimates, verification, and persistence boundaries.",
   "outerRails": {
     "inbound": "Inbound event",
@@ -71,9 +71,9 @@
     "llmsTxt": "./llms.txt",
     "json": "./hermes-xray.json"
   },
-  "name": "Hermes Runtime X-Ray",
+  "name": "hermes-xray",
   "interactive_xray": {
-    "working_name": "Hermes Runtime X-Ray",
+    "working_name": "hermes-xray",
     "rejected_name": "Hermes Agent Dissect",
     "purpose": "Let a visitor enter a simple prompt and inspect the observable runtime path without exposing hidden chain-of-thought.",
     "stages": [
