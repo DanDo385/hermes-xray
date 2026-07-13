@@ -33,7 +33,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.45;
 }
 
@@ -52,7 +52,7 @@ input {
 
 kbd {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   padding: 1px 4px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
@@ -79,14 +79,14 @@ kbd {
 .keys-panel-head h2 {
   margin: 0 0 4px;
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text);
 }
 
 .keys-panel-head p {
   margin: 0 0 10px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-dim);
   max-width: 56rem;
   line-height: 1.45;
@@ -94,7 +94,7 @@ kbd {
 
 .keys-panel-head code {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--accent-text);
 }
 
@@ -139,7 +139,7 @@ kbd {
 
 .keys-card-kicker {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-faint);
@@ -151,13 +151,13 @@ kbd {
 
 .keys-card-title {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text);
 }
 
 .keys-card-body {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-dim);
   line-height: 1.4;
 }
@@ -174,7 +174,7 @@ kbd {
 .keys-hint,
 .keys-banner {
   margin: 8px 0 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-faint);
 }
 
@@ -194,7 +194,7 @@ kbd {
 .auth-ok,
 .auth-masked {
   margin: 8px 0 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-faint);
   max-width: 72rem;
 }
@@ -206,7 +206,7 @@ kbd {
 .auth-field {
   display: grid;
   gap: 4px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-faint);
 }
 
@@ -222,7 +222,7 @@ kbd {
   color: var(--text);
   padding: 6px 8px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 @media (max-width: 900px) {
@@ -247,7 +247,7 @@ kbd {
 
 .start-here-title {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -263,7 +263,7 @@ kbd {
   padding: 0;
   list-style: none;
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .start-here-steps strong {
@@ -302,7 +302,7 @@ kbd {
 .now-label {
   flex-shrink: 0;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -311,7 +311,7 @@ kbd {
 
 .now-summary {
   color: var(--text);
-  font-size: 12px;
+  font-size: 13px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -345,14 +345,14 @@ kbd {
 
 .now-progress-text {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-faint);
   min-width: 2.5em;
 }
 
 .pane-sub {
   margin: 2px 0 0;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-faint);
   font-weight: 400;
   text-transform: none;
@@ -369,7 +369,7 @@ kbd {
 .auth-field {
   display: grid;
   gap: 4px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-faint);
 }
 
@@ -385,7 +385,7 @@ kbd {
   color: var(--text);
   padding: 6px 8px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .run-submit {
@@ -396,7 +396,7 @@ kbd {
   border-radius: var(--radius);
   color: #e8ffe9;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .run-submit:disabled {
@@ -410,7 +410,7 @@ kbd {
   border-bottom: 1px solid var(--error);
   color: #f0b4b4;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .command-help {
@@ -421,7 +421,7 @@ kbd {
   border-bottom: 1px solid var(--border);
   background: #10161c;
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.4;
 }
 
@@ -469,7 +469,7 @@ kbd {
 .titlebar-brand h1 {
   margin: 0;
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--accent-text);
@@ -477,7 +477,7 @@ kbd {
 
 .titlebar-brand span {
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -495,7 +495,7 @@ kbd {
   gap: 10px;
   color: var(--text-faint);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   flex-shrink: 0;
 }
 
@@ -520,7 +520,7 @@ kbd {
 
 .prompt-row label {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-faint);
   flex-shrink: 0;
 }
@@ -534,7 +534,7 @@ kbd {
   color: var(--text);
   padding: 6px 8px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .prompt-row input:focus {
@@ -577,12 +577,12 @@ kbd {
 }
 
 .toolbar button .label {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .status-chip {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   padding: 4px 8px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -636,19 +636,19 @@ kbd {
 
 .pipeline-node .num {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-faint);
 }
 
 .pipeline-node .title {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-dim);
 }
 
 .pipeline-node .mini {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-faint);
 }
 
@@ -707,7 +707,7 @@ kbd {
 .pane-header h2 {
   margin: 0;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -747,7 +747,7 @@ kbd {
   margin: 0;
   padding: 0;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .stack-list li {
@@ -769,7 +769,7 @@ kbd {
 
 .stack-list .frame-meta {
   display: block;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-faint);
   margin-top: 2px;
 }
@@ -780,7 +780,7 @@ kbd {
   display: grid;
   gap: 6px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .watch-row {
@@ -816,7 +816,7 @@ kbd {
 
 .watch-section h3 {
   margin: 0 0 6px;
-  font-size: 10px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-faint);
@@ -862,7 +862,7 @@ kbd {
   margin: 0;
   padding: 0;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .timeline-item {
@@ -913,7 +913,7 @@ kbd {
 
 .source-block {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .source-path {
@@ -954,7 +954,7 @@ kbd {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: auto;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-dim);
   max-height: 180px;
 }
@@ -962,7 +962,7 @@ kbd {
 .empty-hint {
   color: var(--text-faint);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
   padding: 12px 4px;
 }
 
@@ -1050,7 +1050,7 @@ kbd {
 .site-nav a {
   padding: 4px 10px;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   text-decoration: none;
   color: var(--text-dim);
   border-radius: var(--radius);
@@ -1082,7 +1082,7 @@ kbd {
 
 .key-security-title {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1094,7 +1094,7 @@ kbd {
   margin: 0;
   padding-left: 18px;
   color: #d4c48a;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.45;
 }
 
@@ -1104,7 +1104,7 @@ kbd {
   border: 1px solid var(--error);
   background: #2a1515;
   color: #f0b4b4;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .key-security-checks ul {
@@ -1117,7 +1117,7 @@ kbd {
   gap: 8px;
   align-items: flex-start;
   margin-top: 8px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-dim);
   cursor: pointer;
 }
@@ -1128,13 +1128,13 @@ kbd {
 
 .key-security-nudge {
   margin: 6px 0 0;
-  font-size: 11px;
+  font-size: 12px;
   color: #c9a227;
 }
 
 .key-security-ok {
   margin: 6px 0 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--accent-text);
 }
 
@@ -1165,7 +1165,7 @@ kbd {
 .fun-header h1 {
   margin: 0 0 4px;
   font-family: var(--mono);
-  font-size: 16px;
+  font-size: 17px;
   color: var(--accent-text);
 }
 
@@ -1173,7 +1173,7 @@ kbd {
   margin: 0;
   max-width: 40rem;
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .fun-controls {
@@ -1198,7 +1198,7 @@ kbd {
   border-radius: var(--radius);
   color: var(--text);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .fun-playback button:hover:not(:disabled) {
@@ -1212,7 +1212,7 @@ kbd {
 
 .fun-progress {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-faint);
   margin-left: 4px;
 }
@@ -1227,7 +1227,7 @@ kbd {
 
 .fun-empty {
   color: var(--text-dim);
-  font-size: 14px;
+  font-size: 15px;
   padding: 24px 8px;
 }
 
@@ -1238,7 +1238,7 @@ kbd {
 .fun-act h2 {
   margin: 0 0 10px;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1273,7 +1273,7 @@ kbd {
   border-radius: 999px;
   background: var(--accent-dim);
   color: #e8ffe9;
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.06em;
 }
 
@@ -1282,7 +1282,7 @@ kbd {
   padding-top: 8px;
   border-top: 1px dashed var(--border);
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-faint);
   text-align: right;
 }
@@ -1330,7 +1330,7 @@ kbd {
 
 .fun-box-title {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 6px;
@@ -1338,7 +1338,7 @@ kbd {
 
 .fun-box-body {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.5;
   color: var(--text-dim);
   white-space: pre-wrap;
@@ -1346,7 +1346,7 @@ kbd {
 
 .fun-box.finale .fun-box-body {
   color: var(--text);
-  font-size: 15px;
+  font-size: 16px;
 }
 
 @keyframes fun-in {
