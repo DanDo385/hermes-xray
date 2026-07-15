@@ -199,19 +199,27 @@ function executeTool(
 type ChatMessage =
   | { role: "system"; content: string }
   | { role: "user"; content: string }
-  | { role: "assistant"; content: string; tool_calls?: ToolCall[] }
+  | {
+      role: "assistant";
+      content: string;
+      tool_calls?: ToolCall[];
+      /** Raw Gemini model parts — must be echoed for thought signatures. */
+      geminiParts?: Array<Record<string, unknown>>;
+    }
   | { role: "tool"; tool_call_id: string; name: string; content: string };
 
 interface ToolCall {
   id: string;
   name: string;
   args: Record<string, unknown>;
+  thoughtSignature?: string;
 }
 
 interface ModelTurn {
   text: string;
   toolCalls: ToolCall[];
   finishReason: string;
+  geminiParts?: Array<Record<string, unknown>>;
 }
 
 const SYSTEM_PROMPT = `You are Hermes Agent inside hermes-xray, a debugger demo.
@@ -382,6 +390,7 @@ export async function runLiveAgent(req: RunRequest): Promise<RunResult> {
         role: "assistant",
         content: turn.text,
         tool_calls: turn.toolCalls,
+        geminiParts: turn.geminiParts,
       });
 
       for (const tc of turn.toolCalls) {
@@ -542,6 +551,9 @@ async function callModel(
   if (req.provider === "google") {
     return callGemini(req, messages);
   }
+  if (req.provider === "anthropic") {
+    return callAnthropic(req, messages);
+  }
   return callOpenAICompatible(req, messages);
 }
 
@@ -556,31 +568,55 @@ async function callGemini(
     parts: Array<Record<string, unknown>>;
   }> = [];
 
-  for (const m of messages) {
+  for (let mi = 0; mi < messages.length; mi++) {
+    const m = messages[mi];
     if (m.role === "system") continue;
     if (m.role === "user") {
       contents.push({ role: "user", parts: [{ text: m.content }] });
     } else if (m.role === "assistant") {
-      const parts: Array<Record<string, unknown>> = [];
-      if (m.content) parts.push({ text: m.content });
-      for (const tc of m.tool_calls ?? []) {
-        parts.push({
-          functionCall: { name: tc.name, args: tc.args },
+      if (m.geminiParts?.length) {
+        // Replay exact model parts so thoughtSignature survives tool loops.
+        contents.push({ role: "model", parts: m.geminiParts });
+      } else {
+        const parts: Array<Record<string, unknown>> = [];
+        if (m.content) parts.push({ text: m.content });
+        for (const tc of m.tool_calls ?? []) {
+          const part: Record<string, unknown> = {
+            functionCall: { name: tc.name, args: tc.args },
+          };
+          if (tc.thoughtSignature) {
+            part.thoughtSignature = tc.thoughtSignature;
+          }
+          parts.push(part);
+        }
+        contents.push({
+          role: "model",
+          parts: parts.length ? parts : [{ text: "" }],
         });
       }
-      contents.push({ role: "model", parts: parts.length ? parts : [{ text: "" }] });
     } else if (m.role === "tool") {
-      contents.push({
-        role: "user",
-        parts: [
-          {
-            functionResponse: {
-              name: m.name,
-              response: safeJson(m.content),
-            },
+      // Gemini expects one user turn with all functionResponse parts for the
+      // current tool round (since the last model functionCall turn).
+      const parts: Array<Record<string, unknown>> = [
+        {
+          functionResponse: {
+            name: m.name,
+            response: safeJson(m.content),
           },
-        ],
-      });
+        },
+      ];
+      while (mi + 1 < messages.length && messages[mi + 1].role === "tool") {
+        mi += 1;
+        const next = messages[mi];
+        if (next.role !== "tool") break;
+        parts.push({
+          functionResponse: {
+            name: next.name,
+            response: safeJson(next.content),
+          },
+        });
+      }
+      contents.push({ role: "user", parts });
     }
   }
 
@@ -623,16 +659,25 @@ async function callGemini(
   const toolCalls: ToolCall[] = [];
   let i = 0;
   for (const part of parts) {
+    // Thought/summary parts are for reasoning continuity — do not treat as answer text.
+    if (part.thought === true) continue;
     if (typeof part.text === "string") text += part.text;
     const fc = part.functionCall as
       | { name?: string; args?: Record<string, unknown> }
       | undefined;
     if (fc?.name) {
       i += 1;
+      const signature =
+        typeof part.thoughtSignature === "string"
+          ? part.thoughtSignature
+          : typeof part.thought_signature === "string"
+            ? part.thought_signature
+            : undefined;
       toolCalls.push({
         id: `call_${i}_${fc.name}`,
         name: fc.name,
         args: fc.args ?? {},
+        thoughtSignature: signature,
       });
     }
   }
@@ -642,6 +687,8 @@ async function callGemini(
     text,
     toolCalls,
     finishReason: toolCalls.length ? "tool_calls" : finishReason,
+    // Keep the exact parts array for the next request (signatures included).
+    geminiParts: parts.length ? parts : undefined,
   };
 }
 
@@ -649,10 +696,16 @@ async function callOpenAICompatible(
   req: RunRequest,
   messages: ChatMessage[],
 ): Promise<ModelTurn> {
-  const base =
-    req.provider === "xai"
-      ? "https://api.x.ai/v1"
-      : "https://api.openai.com/v1";
+  const base = openAICompatibleBase(req.provider);
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${req.apiKey}`,
+  };
+  if (req.provider === "openrouter") {
+    headers["HTTP-Referer"] =
+      process.env.OPENROUTER_SITE_URL?.trim() || "https://hermes-xray.local";
+    headers["X-Title"] = "hermes-xray";
+  }
 
   const openaiMessages: Array<Record<string, unknown>> = [];
   for (const m of messages) {
@@ -682,10 +735,7 @@ async function callOpenAICompatible(
 
   const res = await fetch(`${base}/chat/completions`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${req.apiKey}`,
-    },
+    headers,
     body: JSON.stringify({
       model: req.model,
       messages: openaiMessages,
@@ -745,6 +795,125 @@ async function callOpenAICompatible(
   };
 }
 
+async function callAnthropic(
+  req: RunRequest,
+  messages: ChatMessage[],
+): Promise<ModelTurn> {
+  const system =
+    messages.find((m) => m.role === "system")?.content ?? SYSTEM_PROMPT;
+  const anthropicMessages: Array<Record<string, unknown>> = [];
+
+  for (let mi = 0; mi < messages.length; mi++) {
+    const m = messages[mi];
+    if (m.role === "system") continue;
+    if (m.role === "user") {
+      anthropicMessages.push({ role: "user", content: m.content });
+    } else if (m.role === "assistant") {
+      const content: Array<Record<string, unknown>> = [];
+      if (m.content) content.push({ type: "text", text: m.content });
+      for (const tc of m.tool_calls ?? []) {
+        content.push({
+          type: "tool_use",
+          id: tc.id,
+          name: tc.name,
+          input: tc.args,
+        });
+      }
+      anthropicMessages.push({
+        role: "assistant",
+        content: content.length ? content : [{ type: "text", text: "" }],
+      });
+    } else if (m.role === "tool") {
+      const content: Array<Record<string, unknown>> = [
+        {
+          type: "tool_result",
+          tool_use_id: m.tool_call_id,
+          content: m.content,
+        },
+      ];
+      while (mi + 1 < messages.length && messages[mi + 1].role === "tool") {
+        mi += 1;
+        const next = messages[mi];
+        if (next.role !== "tool") break;
+        content.push({
+          type: "tool_result",
+          tool_use_id: next.tool_call_id,
+          content: next.content,
+        });
+      }
+      anthropicMessages.push({ role: "user", content });
+    }
+  }
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": req.apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: req.model,
+      max_tokens: 1024,
+      system,
+      tools: TOOL_DECLARATIONS.map((t) => ({
+        name: t.name,
+        description: t.description,
+        input_schema: t.parameters,
+      })),
+      messages: anthropicMessages,
+    }),
+  });
+
+  const data = (await res.json()) as Record<string, unknown>;
+  if (!res.ok) {
+    const err =
+      (data.error as { message?: string } | undefined)?.message ??
+      JSON.stringify(data).slice(0, 400);
+    throw new Error(`anthropic error (${res.status}): ${err}`);
+  }
+
+  const blocks =
+    (data.content as Array<Record<string, unknown>> | undefined) ?? [];
+  let text = "";
+  const toolCalls: ToolCall[] = [];
+  for (const block of blocks) {
+    if (block.type === "text" && typeof block.text === "string") {
+      text += block.text;
+    } else if (block.type === "tool_use") {
+      toolCalls.push({
+        id: String(block.id ?? `tool_${toolCalls.length + 1}`),
+        name: String(block.name ?? "unknown"),
+        args:
+          block.input && typeof block.input === "object"
+            ? (block.input as Record<string, unknown>)
+            : {},
+      });
+    }
+  }
+
+  const stop = String(data.stop_reason ?? "end_turn");
+  return {
+    text,
+    toolCalls,
+    finishReason: toolCalls.length ? "tool_calls" : stop,
+  };
+}
+
+function openAICompatibleBase(provider: InferenceProvider): string {
+  switch (provider) {
+    case "xai":
+      return "https://api.x.ai/v1";
+    case "openrouter":
+      return "https://openrouter.ai/api/v1";
+    case "huggingface":
+      return "https://router.huggingface.co/v1";
+    case "openai":
+    default:
+      return "https://api.openai.com/v1";
+  }
+}
+
 function safeJson(content: string): unknown {
   try {
     return JSON.parse(content);
@@ -755,13 +924,32 @@ function safeJson(content: string): unknown {
 
 /** Default cheap portfolio model — override with GEMINI_MODEL. */
 export function defaultPortfolioModel(): string {
-  return process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash-lite";
+  // Match current AI Studio / Hermes free-tier Flash-Lite; older 2.0 ids often return limit: 0.
+  return process.env.GEMINI_MODEL?.trim() || "gemini-3.1-flash-lite-preview";
 }
 
 export function defaultModelForProvider(provider: InferenceProvider): string {
-  if (provider === "google") return defaultPortfolioModel();
-  if (provider === "xai") return process.env.XAI_MODEL?.trim() || "grok-2-latest";
-  return process.env.OPENAI_MODEL?.trim() || "gpt-4.1-mini";
+  if (provider === "google") {
+    return defaultPortfolioModel();
+  }
+  if (provider === "openai") {
+    return process.env.OPENAI_MODEL?.trim() || "gpt-4.1-mini";
+  }
+  if (provider === "anthropic") {
+    return process.env.ANTHROPIC_MODEL?.trim() || "claude-haiku-4-5";
+  }
+  if (provider === "xai") {
+    return process.env.XAI_MODEL?.trim() || "grok-2-latest";
+  }
+  if (provider === "openrouter") {
+    return process.env.OPENROUTER_MODEL?.trim() || "openai/gpt-4o-mini";
+  }
+  if (provider === "huggingface") {
+    return (
+      process.env.HUGGINGFACE_MODEL?.trim() || "Qwen/Qwen2.5-7B-Instruct"
+    );
+  }
+  return "gpt-4.1-mini";
 }
 
 export function portfolioApiKey(): string | null {

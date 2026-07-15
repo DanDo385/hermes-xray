@@ -14,7 +14,7 @@ Set on the host:
 
 ```text
 GEMINI_API_KEY=...
-GEMINI_MODEL=gemini-2.0-flash-lite
+GEMINI_MODEL=gemini-3.1-flash-lite-preview
 ```
 
 Project slug: `hermes-xray`  

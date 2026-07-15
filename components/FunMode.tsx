@@ -93,6 +93,10 @@ export function FunMode() {
           mode: auth.mode === "byok" ? "byok" : "portfolio",
           provider: auth.byokProvider,
           apiKey: auth.mode === "byok" ? auth.byokKey.trim() : undefined,
+          model:
+            auth.mode === "byok" && auth.byokModel.trim()
+              ? auth.byokModel.trim()
+              : undefined,
         }),
       });
       const data = (await res.json()) as {

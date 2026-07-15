@@ -3,6 +3,7 @@ import {
   defaultPortfolioModel,
   portfolioApiKey,
 } from "@/lib/agent-runner";
+import { INFERENCE_PROVIDERS } from "@/lib/auth-settings";
 
 export const runtime = "nodejs";
 
@@ -15,8 +16,8 @@ export async function GET() {
       chatgpt: false,
       supergrok: false,
       reason:
-        "ChatGPT and SuperGrok account OAuth do not grant third-party API inference. Use API keys (OpenAI / xAI / Google) or the portfolio Gemini free tier.",
+        "ChatGPT and SuperGrok account OAuth do not grant third-party API inference. Use a visitor API key (Gemini / OpenAI / Anthropic / xAI / OpenRouter / Hugging Face) or the portfolio Gemini free tier.",
     },
-    byokProviders: ["google", "openai", "xai"],
+    byokProviders: [...INFERENCE_PROVIDERS],
   });
 }

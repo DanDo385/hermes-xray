@@ -15,6 +15,7 @@ import {
   stepOver,
   type DebuggerMode,
 } from "@/lib/stepper";
+import { PROVIDER_DEFAULT_MODELS, PROVIDER_LABELS } from "@/lib/auth-settings";
 
 const CONTINUE_MS = 280;
 
@@ -26,7 +27,9 @@ export function Debugger() {
   const [auth, setAuth] = useAuthSettings();
   const [liveBusy, setLiveBusy] = useState(false);
   const [runError, setRunError] = useState<string | null>(null);
-  const [portfolioModel, setPortfolioModel] = useState("gemini-2.0-flash-lite");
+  const [portfolioModel, setPortfolioModel] = useState(
+    "gemini-3.1-flash-lite-preview",
+  );
   const [portfolioReady, setPortfolioReady] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -49,11 +52,12 @@ export function Debugger() {
     if (live) return trace.model;
     if (auth.mode === "portfolio") return portfolioModel;
     if (auth.mode === "byok") {
-      if (auth.byokProvider === "google") {
-        return `${portfolioModel} (visitor key)`;
-      }
-      if (auth.byokProvider === "openai") return "openai (visitor key)";
-      return "xai (visitor key)";
+      const model =
+        auth.byokModel.trim() ||
+        (auth.byokProvider === "google"
+          ? portfolioModel
+          : PROVIDER_DEFAULT_MODELS[auth.byokProvider]);
+      return `${PROVIDER_LABELS[auth.byokProvider]} · ${model}`;
     }
     return trace.model === "gpt-5.5" ? "scripted-demo" : trace.model;
   })();
@@ -82,6 +86,29 @@ export function Debugger() {
     }
   }, []);
 
+  /** Auto-play every event in `events` (pass the array directly — don't rely on state). */
+  const playEvents = useCallback(
+    (events: HermesTrace["events"], fromIndex = -1) => {
+      stopContinue();
+      if (events.length === 0) return;
+      setMode("running");
+      setIndex(fromIndex);
+      timerRef.current = setInterval(() => {
+        setIndex((i) => {
+          const next = stepInto(i < 0 ? -1 : i, events);
+          const end = continueTarget(events);
+          if (next >= end) {
+            stopContinue();
+            setMode("paused");
+            return end;
+          }
+          return next;
+        });
+      }, CONTINUE_MS);
+    },
+    [stopContinue],
+  );
+
   const reset = useCallback(() => {
     stopContinue();
     setIndex(-1);
@@ -90,14 +117,19 @@ export function Debugger() {
   }, [stopContinue]);
 
   const applyTrace = useCallback(
-    (next: HermesTrace) => {
+    (next: HermesTrace, opts?: { autoPlay?: boolean }) => {
       stopContinue();
       setTrace(next);
       setPrompt(next.prompt);
-      setIndex(0);
-      setMode("paused");
+      if (opts?.autoPlay && next.events.length > 0) {
+        // Start before the first event so playback reveals each step.
+        playEvents(next.events, -1);
+      } else {
+        setIndex(0);
+        setMode("paused");
+      }
     },
-    [stopContinue],
+    [playEvents, stopContinue],
   );
 
   const beginTrace = useCallback(
@@ -137,6 +169,10 @@ export function Debugger() {
           mode: auth.mode === "byok" ? "byok" : "portfolio",
           provider: auth.byokProvider,
           apiKey: auth.mode === "byok" ? auth.byokKey.trim() : undefined,
+          model:
+            auth.mode === "byok" && auth.byokModel.trim()
+              ? auth.byokModel.trim()
+              : undefined,
         }),
       });
       const data = (await res.json()) as {
@@ -147,7 +183,8 @@ export function Debugger() {
         throw new Error(data.error || `Run failed (${res.status})`);
       }
       if (data.error) setRunError(data.error);
-      applyTrace(data.trace);
+      // Live runs should play through — pausing on event 0 felt "stuck".
+      applyTrace(data.trace, { autoPlay: true });
     } catch (e) {
       setMode("stopped");
       setRunError(e instanceof Error ? e.message : String(e));
@@ -173,25 +210,8 @@ export function Debugger() {
   }, [stopContinue, trace.events]);
 
   const onContinue = useCallback(() => {
-    stopContinue();
-    if (trace.events.length === 0) return;
-
-    setMode("running");
-    setIndex((i) => (i < 0 ? 0 : i));
-
-    timerRef.current = setInterval(() => {
-      setIndex((i) => {
-        const next = stepInto(i < 0 ? -1 : i, trace.events);
-        const end = continueTarget(trace.events);
-        if (next >= end) {
-          stopContinue();
-          setMode("paused");
-          return end;
-        }
-        return next;
-      });
-    }, CONTINUE_MS);
-  }, [stopContinue, trace.events]);
+    playEvents(trace.events, index < 0 ? -1 : index);
+  }, [index, playEvents, trace.events]);
 
   const onStop = useCallback(() => {
     stopContinue();
@@ -297,8 +317,8 @@ export function Debugger() {
             <em>{auth.mode === "scripted" ? "Load trace" : "Run live"}</em>.
           </li>
           <li>
-            <strong>3.</strong> Press <kbd>F11</kbd> to step one event at a
-            time.
+            <strong>3.</strong> Live runs auto-play the trace; use{" "}
+            <kbd>F11</kbd> anytime to step one event at a time.
           </li>
         </ol>
       </div>
@@ -341,7 +361,7 @@ export function Debugger() {
             title={
               auth.mode === "scripted"
                 ? "Build a stepped demo trace from this prompt"
-                : "Call the model, then step through the resulting trace"
+                : "Call the model, then auto-play the resulting trace"
             }
           >
             {runLabel}

@@ -4,8 +4,12 @@ import { useEffect, useState } from "react";
 import { ApiKeySecurity } from "@/components/ApiKeySecurity";
 import {
   DEFAULT_AUTH,
+  guessProviderFromKey,
+  INFERENCE_PROVIDERS,
   loadAuthSettings,
   maskKey,
+  PROVIDER_DEFAULT_MODELS,
+  PROVIDER_KEY_HINTS,
   PROVIDER_LABELS,
   saveAuthSettings,
   type AuthSettings,
@@ -17,6 +21,7 @@ interface StatusPayload {
   portfolioGemini: boolean;
   portfolioModel: string;
   oauth: { chatgpt: boolean; supergrok: boolean; reason: string };
+  byokProviders?: InferenceProvider[];
 }
 
 export function AuthPanel({
@@ -66,8 +71,21 @@ export function AuthPanel({
 
   const selectMode = (mode: InferenceMode) => update({ mode });
 
+  const onKeyChange = (value: string) => {
+    const guessed = guessProviderFromKey(value);
+    if (guessed && guessed !== settings.byokProvider) {
+      // Key prefix clearly belongs to another platform — route there.
+      update({ byokKey: value, byokProvider: guessed, byokModel: "" });
+      return;
+    }
+    update({ byokKey: value });
+  };
+
   const portfolioReady = status?.portfolioGemini === true;
-  const portfolioModel = status?.portfolioModel ?? "gemini-2.0-flash-lite";
+  const portfolioModel =
+    status?.portfolioModel ?? "gemini-3.1-flash-lite-preview";
+  const defaultModel =
+    PROVIDER_DEFAULT_MODELS[settings.byokProvider] ?? portfolioModel;
 
   return (
     <section className="keys-panel" aria-label="API keys and live test">
@@ -78,7 +96,8 @@ export function AuthPanel({
             Visitors are meant to use <strong>this site&apos;s Gemini</strong>{" "}
             — it runs on the host&apos;s free-tier key on the server. You never
             see, copy, or download that key. Offline demo needs no model. A
-            visitor-supplied key is optional and rare.
+            visitor-supplied key is optional for Gemini, OpenAI, Anthropic,
+            Grok, OpenRouter, or Hugging Face.
           </p>
         </div>
       </div>
@@ -126,8 +145,8 @@ export function AuthPanel({
           <span className="keys-card-kicker">Advanced · optional</span>
           <span className="keys-card-title">Visitor&apos;s own API key</span>
           <span className="keys-card-body">
-            Only if someone prefers their own Google / OpenAI / xAI quota.
-            Not needed for the normal demo. Stored in their browser only.
+            Pick a platform and paste your key. Gemini stays supported alongside
+            OpenAI, Anthropic, Grok, OpenRouter, and Hugging Face.
           </span>
         </button>
       </div>
@@ -135,35 +154,54 @@ export function AuthPanel({
       {settings.mode === "byok" ? (
         <div className="keys-byok">
           <label className="auth-field">
-            <span>Provider</span>
+            <span>Platform</span>
             <select
               value={settings.byokProvider}
               onChange={(e) =>
                 update({
                   byokProvider: e.target.value as InferenceProvider,
+                  byokModel: "",
                 })
               }
             >
-              {(Object.keys(PROVIDER_LABELS) as InferenceProvider[]).map(
-                (p) => (
-                  <option key={p} value={p}>
-                    {PROVIDER_LABELS[p]}
-                  </option>
-                ),
-              )}
+              {INFERENCE_PROVIDERS.map((p) => (
+                <option key={p} value={p}>
+                  {PROVIDER_LABELS[p]}
+                </option>
+              ))}
             </select>
           </label>
           <label className="auth-field">
+            <span>Model (optional)</span>
+            <input
+              type="text"
+              autoComplete="off"
+              spellCheck={false}
+              placeholder={defaultModel}
+              value={settings.byokModel}
+              onChange={(e) => update({ byokModel: e.target.value })}
+            />
+          </label>
+          <label className="auth-field auth-field-key">
             <span>API key</span>
             <input
               type="password"
               autoComplete="off"
               spellCheck={false}
-              placeholder="Paste API key — stays in this browser only"
+              placeholder={PROVIDER_KEY_HINTS[settings.byokProvider]}
               value={settings.byokKey}
-              onChange={(e) => update({ byokKey: e.target.value })}
+              onChange={(e) => onKeyChange(e.target.value)}
             />
           </label>
+          <p className="keys-byok-hint">
+            Routing to <strong>{PROVIDER_LABELS[settings.byokProvider]}</strong>
+            {" · "}
+            default model <code>{defaultModel}</code>
+            {settings.byokModel.trim()
+              ? ` · override ${settings.byokModel.trim()}`
+              : ""}
+            . Key stays in this browser only.
+          </p>
           {settings.byokKey ? (
             <div className="auth-masked">
               saved locally as {maskKey(settings.byokKey)}

@@ -5,7 +5,10 @@ import {
   portfolioApiKey,
   runLiveAgent,
 } from "@/lib/agent-runner";
-import type { InferenceProvider } from "@/lib/auth-settings";
+import {
+  isInferenceProvider,
+  type InferenceProvider,
+} from "@/lib/auth-settings";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -69,10 +72,16 @@ export async function POST(req: Request) {
     provider = "google";
     model = body.model?.trim() || defaultPortfolioModel();
   } else {
-    provider =
-      body.provider === "openai" || body.provider === "xai"
-        ? body.provider
-        : "google";
+    if (!isInferenceProvider(body.provider)) {
+      return NextResponse.json(
+        {
+          error:
+            "provider must be one of: google, openai, anthropic, xai, openrouter, huggingface",
+        },
+        { status: 400 },
+      );
+    }
+    provider = body.provider;
     apiKey = body.apiKey?.trim() || null;
     if (!apiKey) {
       return NextResponse.json(
