@@ -12,7 +12,7 @@ export const INFERENCE_PROVIDERS = [
 export type InferenceProvider = (typeof INFERENCE_PROVIDERS)[number];
 
 export type InferenceMode =
-  /** Replay scripted HermesEvent trace — no network */
+  /** Replay scripted HermesEvent trace - no network */
   | "scripted"
   /** Server uses portfolio GEMINI_API_KEY (never exposed to browser) */
   | "portfolio"
@@ -24,7 +24,7 @@ export interface AuthSettings {
   byokProvider: InferenceProvider;
   /** Optional model override for BYOK (empty = provider default) */
   byokModel: string;
-  /** Present only in memory / localStorage — never logged server-side intentionally */
+  /** Present only in memory / localStorage - never logged server-side intentionally */
   byokKey: string;
 }
 
@@ -73,7 +73,7 @@ export function isInferenceProvider(value: unknown): value is InferenceProvider 
   );
 }
 
-/** Best-effort guess from common key prefixes — UI still lets the user override. */
+/** Best-effort guess from common key prefixes - UI still lets the user override. */
 export function guessProviderFromKey(key: string): InferenceProvider | null {
   const k = key.trim();
   if (!k) return null;

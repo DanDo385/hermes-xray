@@ -3,14 +3,14 @@
 import { useMemo, useState } from "react";
 
 const WARNINGS = [
-  "This site’s Gemini demo is meant to be used — it spends the host’s free-tier quota on the server.",
+  "This site’s Gemini demo is meant to be used - it spends the host’s free-tier quota on the server.",
   "The host API key is never sent to your browser, shown in the UI, or downloadable. You only trigger a run.",
   "Do not ask the host to paste or share their key. If someone sends you a key in chat, tell them to revoke it.",
-  "Optional visitor keys are advanced only. Treat any pasted key like a password — never commit or screenshot it.",
+  "Optional visitor keys are advanced only. Treat any pasted key like a password - never commit or screenshot it.",
   "If a key may have leaked, revoke it in the provider console and create a new one.",
 ];
 
-/** Lightweight client-side checks — not a substitute for provider-side revocation. */
+/** Lightweight client-side checks - not a substitute for provider-side revocation. */
 export function checkApiKeySafety(key: string): {
   ok: boolean;
   messages: string[];
@@ -20,7 +20,7 @@ export function checkApiKeySafety(key: string): {
   if (!t) return { ok: true, messages: [] };
 
   if (/\s/.test(t)) {
-    messages.push("This key contains spaces — paste only the key, nothing else.");
+    messages.push("This key contains spaces - paste only the key, nothing else.");
   }
   if (t.length < 20) {
     messages.push("This looks shorter than a typical API key. Double-check the paste.");
@@ -32,7 +32,7 @@ export function checkApiKeySafety(key: string): {
     messages.push("Do not paste URLs or emails into the key field.");
   }
   if (/^(here'?s my|my key is|sk-…|xxxx)/i.test(t)) {
-    messages.push("Paste the raw key only — no commentary.");
+    messages.push("Paste the raw key only - no commentary.");
   }
 
   return { ok: messages.length === 0, messages };

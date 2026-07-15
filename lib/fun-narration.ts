@@ -72,7 +72,7 @@ function narrateEvent(ev: HermesEvent): StoryBeat | null {
         kind: "loop",
         iteration: iter,
         title: `Loop turn #${iter ?? "?"} begins`,
-        body: `Time loops once more — this is agent round ${iter}. Hermes will think, maybe call tools, then decide whether to continue.`,
+        body: `Time loops once more - this is agent round ${iter}. Hermes will think, maybe call tools, then decide whether to continue.`,
       };
     case "reasoning":
       return {
@@ -135,7 +135,7 @@ function narrateEvent(ev: HermesEvent): StoryBeat | null {
         iteration: iter,
         turnEnd: true,
         title: "Saving this beat",
-        body: `Transcript update — messages on disk now ≈ ${String(p.message_count ?? "…")}. The loop can safely continue or stop.`,
+        body: `Transcript update - messages on disk now ≈ ${String(p.message_count ?? "…")}. The loop can safely continue or stop.`,
       };
     case "loop_decision":
       if (p.decision === "continue") {
@@ -145,7 +145,7 @@ function narrateEvent(ev: HermesEvent): StoryBeat | null {
           kind: "loop_back",
           iteration: iter,
           turnEnd: true,
-          title: "Not done — looping again",
+          title: "Not done - looping again",
           body: "There’s still tool work (or unfinished thinking), so Hermes winds the clock and starts another turn.",
         };
       }

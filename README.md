@@ -1,6 +1,6 @@
 # hermes-xray
 
-Debugger-style end-to-end trace of a prompt through [Hermes Agent](https://github.com/NousResearch/hermes-agent) — like pressing F5 through a debugger, one stage at a time.
+Debugger-style end-to-end trace of a prompt through [Hermes Agent](https://github.com/NousResearch/hermes-agent) - like pressing F5 through a debugger, one stage at a time.
 
 ## What you get
 

@@ -103,7 +103,7 @@ function buildDemoEvents(): HermesEvent[] {
       symbol: "run_conversation",
       role: "Start iteration under IterationBudget",
     },
-    summary: "Loop iteration #1 / 8 — api_call_count=1",
+    summary: "Loop iteration #1 / 8 - api_call_count=1",
     payload: {
       iteration: 1,
       max_iterations: 8,
@@ -249,7 +249,7 @@ function buildDemoEvents(): HermesEvent[] {
       symbol: "run_conversation",
       role: "Continue while tool work remains",
     },
-    summary: "Decision: continue — tool_calls present, budget ok",
+    summary: "Decision: continue - tool_calls present, budget ok",
     payload: {
       decision: "continue",
       stop_reason: "tool_calls",
@@ -270,7 +270,7 @@ function buildDemoEvents(): HermesEvent[] {
       symbol: "run_conversation",
       role: "Start iteration under IterationBudget",
     },
-    summary: "Loop iteration #2 / 8 — api_call_count=2",
+    summary: "Loop iteration #2 / 8 - api_call_count=2",
     payload: {
       iteration: 2,
       max_iterations: 8,
@@ -293,7 +293,7 @@ function buildDemoEvents(): HermesEvent[] {
     payload: {
       finish_reason: "tool_calls",
       stop_reason: "tool_calls",
-      assistant_preview: "Found README.md — reading it now.",
+      assistant_preview: "Found README.md - reading it now.",
       tool_calls_pending: 1,
     },
   });
@@ -398,7 +398,7 @@ function buildDemoEvents(): HermesEvent[] {
       symbol: "run_conversation",
       role: "Continue while tool work remains",
     },
-    summary: "Decision: continue — need final summary turn",
+    summary: "Decision: continue - need final summary turn",
     payload: {
       decision: "continue",
       stop_reason: "tool_calls",
@@ -419,7 +419,7 @@ function buildDemoEvents(): HermesEvent[] {
       symbol: "run_conversation",
       role: "Start iteration under IterationBudget",
     },
-    summary: "Loop iteration #3 / 8 — api_call_count=3",
+    summary: "Loop iteration #3 / 8 - api_call_count=3",
     payload: {
       iteration: 3,
       max_iterations: 8,
@@ -491,7 +491,7 @@ function buildDemoEvents(): HermesEvent[] {
       symbol: "run_conversation",
       role: "Stop on text_response",
     },
-    summary: "Decision: stop — text_response (finish_reason=stop)",
+    summary: "Decision: stop - text_response (finish_reason=stop)",
     payload: {
       decision: "stop",
       stop_reason: "text_response",
@@ -511,7 +511,7 @@ function buildDemoEvents(): HermesEvent[] {
       symbol: "AIAgent",
       role: "Close run; emit final response",
     },
-    summary: "Agent ended — final response ready",
+    summary: "Agent ended - final response ready",
     payload: {
       stop_reason: "text_response",
       final_response:

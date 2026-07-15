@@ -86,7 +86,7 @@ export function Debugger() {
     }
   }, []);
 
-  /** Auto-play every event in `events` (pass the array directly — don't rely on state). */
+  /** Auto-play every event in `events` (pass the array directly - don't rely on state). */
   const playEvents = useCallback(
     (events: HermesTrace["events"], fromIndex = -1) => {
       stopContinue();
@@ -183,7 +183,7 @@ export function Debugger() {
         throw new Error(data.error || `Run failed (${res.status})`);
       }
       if (data.error) setRunError(data.error);
-      // Live runs should play through — pausing on event 0 felt "stuck".
+      // Live runs should play through - pausing on event 0 felt "stuck".
       applyTrace(data.trace, { autoPlay: true });
     } catch (e) {
       setMode("stopped");
@@ -264,7 +264,7 @@ export function Debugger() {
         ? "Finished"
         : index < 0
           ? "Idle"
-          : "Paused — ready to step";
+          : "Paused - ready to step";
 
   const runLabel =
     auth.mode === "scripted"
@@ -290,7 +290,7 @@ export function Debugger() {
         <div className="titlebar-brand">
           <h1>hermes-xray</h1>
           <span>
-            Watch a prompt move through Hermes — one debugger step at a time
+            Watch a prompt move through Hermes - one debugger step at a time
           </span>
         </div>
         <div className="titlebar-right">
@@ -299,7 +299,7 @@ export function Debugger() {
             <span title="Model for this run / selected mode">{displayModel}</span>
             <span title="Platform / provider">{displayPlatform}</span>
             <span title="Current event in the trace">
-              step {index < 0 ? "—" : `${index + 1} / ${trace.events.length}`}
+              step {index < 0 ? "-" : `${index + 1} / ${trace.events.length}`}
             </span>
           </div>
         </div>
@@ -382,7 +382,7 @@ export function Debugger() {
               className="primary"
               onClick={onStepInto}
               disabled={liveBusy || atEnd}
-              title="Step Into (F11) — go forward by one event (best for learning)"
+              title="Step Into (F11) - go forward by one event (best for learning)"
             >
               <span className="label">Next event</span>
               <kbd>F11</kbd>
@@ -391,7 +391,7 @@ export function Debugger() {
               type="button"
               onClick={onStepOver}
               disabled={liveBusy || atEnd}
-              title="Step Over (F10) — skip nested detail; jump to next broader stage"
+              title="Step Over (F10) - skip nested detail; jump to next broader stage"
             >
               <span className="label">Skip detail</span>
               <kbd>F10</kbd>
@@ -400,7 +400,7 @@ export function Debugger() {
               type="button"
               onClick={mode === "running" ? onStop : onContinue}
               disabled={liveBusy || (atEnd && mode !== "running")}
-              title="Continue (F5) — auto-play every remaining event"
+              title="Continue (F5) - auto-play every remaining event"
             >
               <span className="label">
                 {mode === "running" && !liveBusy ? "Pause" : "Play all"}
@@ -410,7 +410,7 @@ export function Debugger() {
             <button
               type="button"
               onClick={reset}
-              title="Reset — clear progress back to before the first event"
+              title="Reset - clear progress back to before the first event"
               disabled={liveBusy || (atStart && mode === "stopped")}
             >
               <span className="label">Reset</span>
@@ -426,21 +426,21 @@ export function Debugger() {
         <div className="command-help-item">
           <kbd>F11</kbd>
           <span>
-            <strong>Next event</strong> — one step forward (see every nested
+            <strong>Next event</strong> - one step forward (see every nested
             tool call).
           </span>
         </div>
         <div className="command-help-item">
           <kbd>F10</kbd>
           <span>
-            <strong>Skip detail</strong> — jump ahead past nested events to
+            <strong>Skip detail</strong> - jump ahead past nested events to
             the next broader stage.
           </span>
         </div>
         <div className="command-help-item">
           <kbd>F5</kbd>
           <span>
-            <strong>Play all</strong> — auto-runs to the end (press again to
+            <strong>Play all</strong> - auto-runs to the end (press again to
             pause).
           </span>
         </div>
@@ -552,7 +552,7 @@ export function Debugger() {
                 k="loop #"
                 v={
                   snapshot.watches.iteration == null
-                    ? "—"
+                    ? "-"
                     : `${snapshot.watches.iteration} / ${snapshot.watches.maxIterations}`
                 }
               />
@@ -560,21 +560,21 @@ export function Debugger() {
                 k="budget left"
                 v={
                   snapshot.watches.budgetRemaining == null
-                    ? "—"
+                    ? "-"
                     : String(snapshot.watches.budgetRemaining)
                 }
               />
               <Watch k="stop reason" v={String(snapshot.watches.stopReason)} />
               <Watch
                 k="finish reason"
-                v={snapshot.watches.finishReason ?? "—"}
+                v={snapshot.watches.finishReason ?? "-"}
               />
               <Watch
                 k="tools used"
                 v={
                   snapshot.watches.selectedTools.length
                     ? snapshot.watches.selectedTools.join(", ")
-                    : "—"
+                    : "-"
                 }
                 className="tool"
               />
@@ -583,7 +583,7 @@ export function Debugger() {
                 v={
                   snapshot.watches.lastToolArgs
                     ? JSON.stringify(snapshot.watches.lastToolArgs, null, 0)
-                    : "—"
+                    : "-"
                 }
                 className="tool"
               />
@@ -595,7 +595,7 @@ export function Debugger() {
                         JSON.stringify(snapshot.watches.lastToolResult),
                         160,
                       )
-                    : "—"
+                    : "-"
                 }
                 className="tool"
               />
@@ -604,7 +604,7 @@ export function Debugger() {
                 v={
                   snapshot.watches.availableTools.length
                     ? snapshot.watches.availableTools.join(", ")
-                    : "—"
+                    : "-"
                 }
               />
               <Watch
@@ -615,7 +615,7 @@ export function Debugger() {
                 k="~prompt tokens"
                 v={
                   snapshot.watches.estimatedPromptTokens == null
-                    ? "—"
+                    ? "-"
                     : String(snapshot.watches.estimatedPromptTokens)
                 }
               />

@@ -25,7 +25,7 @@ export function getScriptedTrace(prompt?: string): HermesTrace {
     return DEMO_TRACE;
   }
   // Custom prompts still replay the canonical topology with the prompt swapped
-  // into the inbound event — keeps stepping deterministic.
+  // into the inbound event - keeps stepping deterministic.
   const events = DEMO_TRACE.events.map((ev) => {
     if (ev.type !== "inbound") return ev;
     return {

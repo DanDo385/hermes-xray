@@ -203,7 +203,7 @@ type ChatMessage =
       role: "assistant";
       content: string;
       tool_calls?: ToolCall[];
-      /** Raw Gemini model parts — must be echoed for thought signatures. */
+      /** Raw Gemini model parts - must be echoed for thought signatures. */
       geminiParts?: Array<Record<string, unknown>>;
     }
   | { role: "tool"; tool_call_id: string; name: string; content: string };
@@ -224,7 +224,7 @@ interface ModelTurn {
 
 const SYSTEM_PROMPT = `You are Hermes Agent inside hermes-xray, a debugger demo.
 You have tools: search_files and read_file (allowlisted workspace files only).
-When the user asks about README.md or project files, use tools — do not invent file contents.
+When the user asks about README.md or project files, use tools - do not invent file contents.
 After you have enough evidence, give a concise final answer.
 Keep tool use minimal (typically search then read, then answer).`;
 
@@ -349,7 +349,7 @@ export async function runLiveAgent(req: RunRequest): Promise<RunResult> {
           iteration,
           depth: 0,
           module: MODULES.loop,
-          summary: "Decision: stop — text_response",
+          summary: "Decision: stop - text_response",
           payload: {
             decision: "stop",
             stop_reason: "text_response",
@@ -364,7 +364,7 @@ export async function runLiveAgent(req: RunRequest): Promise<RunResult> {
           iteration,
           depth: 0,
           module: MODULES.loop,
-          summary: "Agent ended — final response ready",
+          summary: "Agent ended - final response ready",
           payload: {
             stop_reason: "text_response",
             final_response: turn.text,
@@ -470,7 +470,7 @@ export async function runLiveAgent(req: RunRequest): Promise<RunResult> {
         iteration,
         depth: 0,
         module: MODULES.loop,
-        summary: "Decision: continue — tool_calls present",
+        summary: "Decision: continue - tool_calls present",
         payload: {
           decision: "continue",
           stop_reason: "tool_calls",
@@ -485,7 +485,7 @@ export async function runLiveAgent(req: RunRequest): Promise<RunResult> {
       stage: "loop_decision",
       depth: 0,
       module: MODULES.loop,
-      summary: "Agent ended — max_iterations",
+      summary: "Agent ended - max_iterations",
       payload: {
         stop_reason: "max_iterations",
         final_response: "Stopped: max iterations reached.",
@@ -511,7 +511,7 @@ export async function runLiveAgent(req: RunRequest): Promise<RunResult> {
       stage: "loop_decision",
       depth: 0,
       module: MODULES.loop,
-      summary: `Agent ended — error: ${message}`,
+      summary: `Agent ended - error: ${message}`,
       payload: {
         stop_reason: "error",
         final_response: message,
@@ -659,7 +659,7 @@ async function callGemini(
   const toolCalls: ToolCall[] = [];
   let i = 0;
   for (const part of parts) {
-    // Thought/summary parts are for reasoning continuity — do not treat as answer text.
+    // Thought/summary parts are for reasoning continuity - do not treat as answer text.
     if (part.thought === true) continue;
     if (typeof part.text === "string") text += part.text;
     const fc = part.functionCall as
@@ -922,7 +922,7 @@ function safeJson(content: string): unknown {
   }
 }
 
-/** Default cheap portfolio model — override with GEMINI_MODEL. */
+/** Default cheap portfolio model - override with GEMINI_MODEL. */
 export function defaultPortfolioModel(): string {
   // Match current AI Studio / Hermes free-tier Flash-Lite; older 2.0 ids often return limit: 0.
   return process.env.GEMINI_MODEL?.trim() || "gemini-3.1-flash-lite-preview";

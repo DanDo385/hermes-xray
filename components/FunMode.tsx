@@ -195,7 +195,7 @@ export function FunMode() {
       <div className="fun-timeline" aria-live="polite">
         {!trace ? (
           <p className="fun-empty">
-            Pick Offline demo or This site&apos;s Gemini — then hit{" "}
+            Pick Offline demo or This site&apos;s Gemini - then hit{" "}
             <strong>Tell the story</strong>. A visitor API key is optional.
             Boxes appear as each turn unfolds.
           </p>

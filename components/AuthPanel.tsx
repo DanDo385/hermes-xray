@@ -74,7 +74,7 @@ export function AuthPanel({
   const onKeyChange = (value: string) => {
     const guessed = guessProviderFromKey(value);
     if (guessed && guessed !== settings.byokProvider) {
-      // Key prefix clearly belongs to another platform — route there.
+      // Key prefix clearly belongs to another platform - route there.
       update({ byokKey: value, byokProvider: guessed, byokModel: "" });
       return;
     }
@@ -94,7 +94,7 @@ export function AuthPanel({
           <h2>Try a live prompt</h2>
           <p>
             Visitors are meant to use <strong>this site&apos;s Gemini</strong>{" "}
-            — it runs on the host&apos;s free-tier key on the server. You never
+            - it runs on the host&apos;s free-tier key on the server. You never
             see, copy, or download that key. Offline demo needs no model. A
             visitor-supplied key is optional for Gemini, OpenAI, Anthropic,
             Grok, OpenRouter, or Hugging Face.
@@ -110,7 +110,7 @@ export function AuthPanel({
           disabled={!portfolioReady}
           title={
             portfolioReady
-              ? `Run on ${portfolioModel} — host key stays on the server`
+              ? `Run on ${portfolioModel} - host key stays on the server`
               : "Set GEMINI_API_KEY on the server to enable this"
           }
         >
@@ -120,7 +120,7 @@ export function AuthPanel({
           </span>
           <span className="keys-card-body">
             {portfolioReady
-              ? "Live demo powered by the host’s Google free-tier key. The key never leaves the server — visitors only trigger a run."
+              ? "Live demo powered by the host’s Google free-tier key. The key never leaves the server - visitors only trigger a run."
               : "Host hasn’t set GEMINI_API_KEY yet. Offline demo still works."}
           </span>
         </button>
