@@ -1,0 +1,22 @@
+{
+  "project": "hermes-xray",
+  "generatedAt": "2026-07-15",
+  "screenshots": [
+    "public/screenshots/01-overview.png",
+    "public/screenshots/02-custom-prompt.png",
+    "public/screenshots/03-loop-policy.png",
+    "public/screenshots/04-tool-dispatch.png",
+    "public/screenshots/05-verify-persist.png"
+  ],
+  "gif": "public/gif/preview.gif",
+  "short": {
+    "path": "public/demos/short/short.mp4",
+    "youtubeId": "mmAUx7zuQaM",
+    "youtubeUrl": "https://www.youtube.com/watch?v=mmAUx7zuQaM"
+  },
+  "detailed": {
+    "path": "public/demos/detailed/detailed.mp4",
+    "youtubeId": "uBvXQIz2MS4",
+    "youtubeUrl": "https://www.youtube.com/watch?v=uBvXQIz2MS4"
+  }
+}
