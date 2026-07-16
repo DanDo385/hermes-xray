@@ -2,6 +2,8 @@
 
 hermes-xray is a standalone, browser-only observability demo for a Hermes-style tool-using agent.
 
+![Hermes X-Ray walkthrough](public/gif/preview.gif)
+
 Type a simple prompt and inspect the observable runtime path:
 
 1. Prompt intake
@@ -15,6 +17,19 @@ The interface shows model-visible prompt context, operational rationale summarie
 ## Relationship to Agent Runtime
 
 This is a separate project inspired by [Agent Runtime](https://github.com/DanDo385/agent-runtime), especially its static HTML/CSS presentation and five-part runtime model. hermes-xray does not replace Agent Runtime and has independent source, history, GitHub repository, portfolio slug, and assets.
+
+## Walkthroughs
+
+- [Short walkthrough](https://www.youtube.com/watch?v=mmAUx7zuQaM): the user-visible thesis and one complete interaction.
+- [Detailed walkthrough](https://www.youtube.com/watch?v=uBvXQIz2MS4): prompt context, loop policy, tool dispatch, verification, and persistence boundaries.
+
+## Selected states
+
+![Custom prompt context and visible state](public/screenshots/02-custom-prompt.png)
+
+![Loop policy and stop conditions](public/screenshots/03-loop-policy.png)
+
+![Verification and persistence boundary](public/screenshots/05-verify-persist.png)
 
 ## Run locally
 
@@ -34,6 +49,11 @@ hermes-xray/
 ├── hermes-xray.json    # Machine-readable runtime/observability map
 ├── llms.txt            # Agent-readable project summary
 ├── PORTFOLIO.md        # Safe portfolio-site integration recipe
+├── public/
+│   ├── screenshots/    # Canonical UI states used in this README and the GIF
+│   ├── gif/preview.gif # Repository and portfolio preview
+│   ├── demos/          # Final short and detailed MP4 walkthroughs
+│   └── media.json      # Local media paths plus published YouTube URLs
 └── README.md
 ```
 
