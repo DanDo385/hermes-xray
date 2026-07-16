@@ -18,5 +18,13 @@
     "path": "public/demos/detailed/detailed.mp4",
     "youtubeId": "uBvXQIz2MS4",
     "youtubeUrl": "https://www.youtube.com/watch?v=uBvXQIz2MS4"
+  },
+  "shortClip": {
+    "youtubeUrl": "https://www.youtube.com/watch?v=mmAUx7zuQaM",
+    "youtubeId": "mmAUx7zuQaM"
+  },
+  "longClip": {
+    "youtubeUrl": "https://www.youtube.com/watch?v=uBvXQIz2MS4",
+    "youtubeId": "uBvXQIz2MS4"
   }
 }
