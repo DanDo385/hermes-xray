@@ -1,12 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    (function () {
+      try {
+        var embed =
+          new URLSearchParams(location.search).get("embed") === "1" ||
+          window.self !== window.top;
+        if (embed) document.documentElement.dataset.embed = "1";
+      } catch (e) {
+        if (window.self !== window.top) document.documentElement.dataset.embed = "1";
+      }
+    })();
+  </script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>hermes-xray</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0c0f'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='monospace' font-size='14' font-weight='700' fill='%2322d3ee'%3EHX%3C/text%3E%3C/svg%3E">
 <style>
+
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+  html[data-embed="1"] .top-actions {
+    display: none !important;
+  }
 
   :root {
     --bg: #0a0c0f;

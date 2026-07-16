@@ -1389,3 +1389,243 @@ kbd {
   }
 }
 
+
+
+/* ── Site chrome: Display + Agent Mode ── */
+.site-chrome {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-control-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.theme-toggle,
+.nav-agent-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.theme-toggle:hover,
+.nav-agent-toggle:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.theme-toggle svg {
+  width: 14px;
+  height: 14px;
+}
+
+.nav-agent-toggle.active {
+  color: var(--accent-text);
+  border-color: var(--accent-dim);
+  background: var(--bg-active);
+}
+
+.nav-agent-emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+html[data-theme="light"] {
+  --bg: #f4f6f8;
+  --bg-panel: #ffffff;
+  --bg-elevated: #eef2f5;
+  --bg-active: #e4f0e6;
+  --border: #d0d7de;
+  --border-strong: #afb8c1;
+  --text: #1f2328;
+  --text-dim: #59636e;
+  --text-faint: #818b98;
+  --accent: #1a7f37;
+  --accent-dim: #dafbe1;
+  --accent-text: #116329;
+  --warn: #9a6700;
+  --error: #cf222e;
+  --tool: #0969da;
+  --assistant: #8250df;
+  --user: #9a6700;
+}
+
+/* ── Agent Mode page ── */
+.agent-page {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.agent-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+
+.agent-brand {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.agent-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 16px 64px;
+}
+
+.agent-kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+.agent-hero h1 {
+  margin: 8px 0 12px;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.agent-hero p {
+  color: var(--text-dim);
+  max-width: 62ch;
+}
+
+.agent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.agent-action {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  color: var(--text);
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.agent-action.muted {
+  color: var(--text-dim);
+}
+
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 28px 0;
+}
+
+.agent-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  padding: 14px;
+}
+
+.agent-card-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.agent-card h2 {
+  margin: 6px 0 8px;
+  font-size: 16px;
+}
+
+.agent-card p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.agent-section {
+  margin-top: 28px;
+}
+
+.agent-section .section-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 10px;
+}
+
+.agent-context {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 16px;
+}
+
+.agent-context h2,
+.agent-principles h3 {
+  margin-top: 0;
+}
+
+.agent-context ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--text-dim);
+}
+
+.agent-manifest {
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-panel);
+  padding: 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 840px) {
+  .agent-grid,
+  .agent-context {
+    grid-template-columns: 1fr;
+  }
+
+  .titlebar-right {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}

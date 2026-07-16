@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthPanel, useAuthSettings } from "@/components/AuthPanel";
+import { SiteChrome } from "@/components/SiteChrome";
 import { SiteNav } from "@/components/SiteNav";
 import { DEMO_PROMPT } from "@/lib/demo-trace";
 import { eventTypeLabel, type HermesTrace } from "@/lib/events";
@@ -294,6 +295,7 @@ export function Debugger() {
           </span>
         </div>
         <div className="titlebar-right">
+          <SiteChrome />
           <SiteNav />
           <div className="titlebar-meta">
             <span title="Model for this run / selected mode">{displayModel}</span>

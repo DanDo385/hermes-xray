@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthPanel, useAuthSettings } from "@/components/AuthPanel";
+import { SiteChrome } from "@/components/SiteChrome";
 import { SiteNav } from "@/components/SiteNav";
 import { DEMO_PROMPT } from "@/lib/demo-trace";
 import type { HermesTrace } from "@/lib/events";
@@ -129,6 +130,7 @@ export function FunMode() {
               loop through tool turns, and land on a final answer.
             </p>
           </div>
+          <SiteChrome />
           <SiteNav />
         </div>
       </header>
