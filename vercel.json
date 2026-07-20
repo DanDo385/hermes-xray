@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "buildCommand": null,
-  "installCommand": null,
-  "outputDirectory": null,
+  "installCommand": "",
+  "buildCommand": "rm -rf .vercel-static && mkdir -p .vercel-static && cp index.html llms.txt hermes-xray.json PORTFOLIO.md README.md .vercel-static/ && cp -R public/. .vercel-static/",
+  "outputDirectory": ".vercel-static",
   "cleanUrls": true,
   "trailingSlash": false
 }
